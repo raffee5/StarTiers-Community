@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StarTiers Leaderboard</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap');
+        :root {
+            --bg: #05060a; --panel: #0d0f17; --border: #1e232e;
+            --gold: #ffcc00; --silver: #e0e0e0; --bronze: #cd7f32;
+            --accent: #58a6ff; --discord: #5865F2;
+        }
+
+        /* PARTICLE BACKGROUND SYSTEM */
+        body { 
+            background: var(--bg); 
+            color: white; 
+            font-family: 'Inter', sans-serif; 
+            margin: 0; 
+            padding: 20px;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at 50% 50%, #161b22 0%, #05060a 100%);
+            z-index: -2;
+        }
+
+        .particles {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            pointer-events: none;
+            background-image: 
+                radial-gradient(1px 1px at 20px 30px, #eee, rgba(0,0,0,0)),
+                radial-gradient(1px 1px at 40px 70px, #fff, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 50px 160px, #ddd, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 90px 40px, #fff, rgba(0,0,0,0));
+            background-size: 200px 200px;
+            animation: moveParticles 100s linear infinite;
+            opacity: 0.3;
+        }
+
+        @keyframes moveParticles {
+            from { background-position: 0 0; }
+            to { background-position: 1000px 1000px; }
+        }
+
+        .top-nav { display: flex; justify-content: space-between; align-items: flex-start; max-width: 1200px; margin: 0 auto 30px; gap: 30px; }
+        .brand-section { display: flex; flex-direction: column; gap: 8px; min-width: 350px; }
+        .logo-area { display: flex; align-items: center; gap: 15px; }
+        .main-logo { width: 60px; height: 60px; border-radius: 10px; object-fit: contain; filter: drop-shadow(0 0 10px rgba(88,166,255,0.3)); }
+        
+        .server-ip { 
+            font-size: 11px; font-weight: 800; color: var(--accent); 
+            letter-spacing: 1.5px; text-transform: uppercase; margin-top: 5px;
+            animation: glowText 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glowText {
+            from { text-shadow: 0 0 5px rgba(88,166,255,0.2); }
+            to { text-shadow: 0 0 15px rgba(88,166,255,0.6); }
+        }
+
+        .search-box { flex: 1; position: relative; }
+        .search-box input { 
+            width: 100%; background: var(--panel); border: 1px solid var(--border); 
+            padding: 14px 20px; border-radius: 12px; color: white; outline: none; 
+            transition: 0.3s; font-size: 14px; backdrop-filter: blur(5px);
+        }
+        .search-box input:focus { border-color: var(--accent); box-shadow: 0 0 20px rgba(88,166,255,0.2); }
+        
+        .discord-btn { background: var(--discord); color: white; text-decoration: none; padding: 14px 25px; border-radius: 12px; font-weight: 900; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; transition: 0.2s; box-shadow: 0 4px 15px rgba(88, 101, 242, 0.3); }
+        .discord-btn:hover { background: #4752c4; transform: scale(1.05); }
+
+        .lb-container { 
+            max-width: 1200px; margin: 0 auto; background: rgba(13, 15, 23, 0.8); 
+            border: 1px solid var(--border); border-radius: 16px; overflow: hidden; 
+            backdrop-filter: blur(10px);
+        }
+        table { width: 100%; border-collapse: collapse; }
+        th { background: rgba(0,0,0,0.4); padding: 20px; text-align: left; font-size: 11px; color: #505a73; text-transform: uppercase; letter-spacing: 2px; }
+        td { padding: 15px 20px; border-bottom: 1px solid rgba(255,255,255,0.02); }
+
+        tr { 
+            position: relative;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease, background 0.3s ease; 
+        }
+
+        tr::after {
+            content: "";
+            position: absolute;
+            top: 0; left: -100%; width: 50%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+            transition: 0.5s;
+            pointer-events: none;
+        }
+
+        tr:hover::after {
+            left: 100%;
+            transition: 0.6s;
+        }
+
+        tr:hover { 
+            background: rgba(255,255,255,0.06); 
+            transform: scale(1.015) translateX(-8px); 
+            z-index: 5;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        tr:has(.r1):hover { box-shadow: 0 0 30px rgba(255, 204, 0, 0.3); }
+        tr:has(.r2):hover { box-shadow: 0 0 30px rgba(224, 224, 224, 0.2); }
+        tr:has(.r3):hover { box-shadow: 0 0 30px rgba(205, 127, 50, 0.2); }
+        tr:not(:has(.r1)):not(:has(.r2)):not(:has(.r3)):hover { box-shadow: 0 0 20px rgba(255, 255, 255, 0.05); }
+        
+        .rank-col { width: 60px; text-align: center; font-weight: 900; font-size: 20px; }
+        .r1 { color: var(--gold); text-shadow: 0 0 10px rgba(255,204,0,0.5); }
+        .r2 { color: var(--silver); text-shadow: 0 0 10px rgba(224,224,224,0.5); }
+        .r3 { color: var(--bronze); text-shadow: 0 0 10px rgba(205,127,50,0.5); }
+        
+        .p-info { display: flex; align-items: center; gap: 14px; }
+        .p-head { width: 38px; height: 38px; border-radius: 6px; image-rendering: pixelated; box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+        .p-name { font-weight: 800; font-size: 15px; letter-spacing: 0.3px; }
+
+        .pts-container { display: flex; flex-direction: column; align-items: flex-start; line-height: 1.1; }
+        .pts-val { font-weight: 900; font-size: 18px; color: var(--accent); }
+        .pts-lbl { font-size: 10px; color: #505a73; text-transform: uppercase; font-weight: 700; }
+
+        .tier-list { display: flex; gap: 6px; flex-wrap: wrap; }
+        .t-badge { display: flex; align-items: center; gap: 5px; background: rgba(0,0,0,0.5); padding: 5px 8px; border-radius: 6px; font-size: 10px; font-weight: 900; border: 1px solid #222; transition: 0.2s; }
+        .active-t:hover { border-color: var(--accent); transform: translateY(-2px); }
+        .t-badge img { width: 16px; height: 16px; image-rendering: pixelated; }
+        .active-t { border-color: #444; color: #fff; }
+        .dim-t { opacity: 0.1; filter: grayscale(1); }
+
+        .footer-strip { 
+            max-width: 1200px; margin: 40px auto 20px; padding: 25px; 
+            border-top: 1px solid var(--border); display: flex; 
+            justify-content: space-between; font-size: 12px; color: #505a73; 
+            font-weight: 600; letter-spacing: 1px;
+        }
+        .footer-strip b { color: var(--accent); }
+    </style>
+</head>
+<body>
+
+    <div class="particles"></div>
+
+    <div class="top-nav">
+        <div class="brand-section">
+            <div class="logo-area">
+                <img src="https://i.postimg.cc/G2TSbPqN/Adobe-Express-file.png" class="main-logo" alt="StarTiers Logo">
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="Search by Username..." onkeyup="filterLb()">
+                </div>
+            </div>
+            <span class="server-ip">OFFICIAL STARTIERS MC SERVER: play.pvphouse.xyz</span>
+        </div>
+        <a href="https://discord.gg/nwQ75ASAv9" target="_blank" class="discord-btn">Join Discord</a>
+    </div>
+
+    <div class="lb-container">
+        <table>
+            <thead>
+                <tr>
+                    <th class="rank-col">Pos</th>
+                    <th>Player</th>
+                    <th>Score</th>
+                    <th>Region</th>
+                    <th>All Gamemodes</th>
+                </tr>
+            </thead>
+            <tbody id="lbTable"></tbody>
+        </table>
+    </div>
+
+    <div class="footer-strip">
+        <span>Email: <b>capstarrytheba@gmail.com</b></span>
+        <span>STARTIERS © COPYRIGHT 2026-2027</span>
+    </div>
+
+    <script>
+        const data = [
+            {"n": "YammanBlox", "r": "EU", "v": "HT4", "u": "LT3", "p": "LT3", "nh": "HT3", "smp": "LT3", "sw": "LT3", "a": "", "m": "", "sp": "", "c": "HT4", "soup": "LT4"},
+            {"n": "BL4ZE_1", "r": "EU", "v": "HT4", "u": "HT4", "p": "", "nh": "", "smp": "", "sw": "HT4", "a": "LT4", "m": "HT5", "sp": "", "c": "", "soup": ""},
+            {"n": "mechycj", "r": "EU", "v": "HT3", "u": "LT3", "p": "", "nh": "", "smp": "", "sw": "", "a": "HT4", "m": "", "sp": "", "c": "", "soup": ""},
+            {"n": "StarryQuest8", "r": "EU", "v": "LT4", "u": "", "p": "", "nh": "", "smp": "LT4", "sw": "LT4", "a": "HT5", "m": "HT4", "sp": "LT4", "c": "", "soup": ""},
+            {"n": "IlikeSpear", "r": "EU", "v": "", "u": "HT4", "p": "LT4", "nh": "", "smp": "LT3", "sw": "LT3", "a": "", "m": "HT4", "sp": "LT3", "c": "", "soup": ""},
+            {"n": "Sr_Ninhoca", "r": "EU", "v": "LT4", "u": "LT3", "p": "", "nh": "LT3", "smp": "", "sw": "", "a": "LT3", "m": "HT4", "sp": "", "c": "", "soup": ""},
+            {"n": "vogel_dylan", "r": "EU", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "HT5", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
+            {"n": "collidermc", "r": "EU", "v": "LT3", "u": "HT4", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
+            {"n": "TheGloryX", "r": "EU", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "LT4", "sp": "", "c": "", "soup": ""},
+            {"n": "Telekenisis2", "r": "EU", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "LT3", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
+            {"n": "Darkbbu", "r": "EU", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "HT5", "sp": "", "c": "", "soup": ""},
+            {"n": "_lex", "r": "EU", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "LT3", "a": "", "m": "HT3", "sp": "", "c": "", "soup": ""},
+            {"n": "HMZ3abi", "r": "EU", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "LT4", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
+            {"n": "TysonFriis", "r": "EU", "v": "", "u": "", "p": "", "nh": "", "smp": "LT3", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
+            {"n": "Job64", "r": "EU/NA", "v": "", "u": "", "p": "", "nh": "", "smp": "LT4", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
+            {"n": "Sezup", "r": "AS", "v": "", "u": "LT4", "p": "", "nh": "", "smp": "", "sw": "LT5", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
+            {"n": "Nesnakomoy_KING", "r": "EU", "v": "", "u": "LT3", "p": "", "nh": "", "smp": "", "sw": "HT4", "a": "HT4", "m": "", "sp": "", "c": "HT4", "soup": ""},
+            {"n": "Rxfreshed_", "r": "EU", "v": "", "u": "LT3", "p": "", "nh": "", "smp": "LT3", "sw": "HT4", "a": "LT3", "m": "", "sp": "", "c": "", "soup": ""},
+            {"n": "apex000", "r": "EU", "v": "", "u": "", "p": "", "nh": "", "smp": "HT5", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
+            {"n": "Swaywasaspotify", "r": "EU", "v": "LT3", "u": "", "p": "", "nh": "", "smp": "", "sw": "LT3", "a": "", "m": "HT3", "sp": "", "c": "", "soup": ""},
+            {"n": "overly23", "r": "EU", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "LT4", "a": "LT4", "m": "", "sp": "", "c": "", "soup": ""},
+            {"n": "SpecterDeath_", "r": "EU", "v": "LT4", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
+            {"n": "majdbadran11", "r": "EU", "v": "HT4", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
+            {"n": "CpvpMaster", "r": "EU", "v": "LT3", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
+            {"n": "kanveet_Gamer", "r": "EU", "v": "LT5", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
+            {"n": "MacroAbuser", "r": "EU", "v": "HT4", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
+            {"n": "CuriosityMC", "r": "AS", "v": "", "u": "", "p": "", "nh": "", "smp": "LT4", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
+            {"n": "wemmbus2", "r": "EU", "v": "", "u": "", "p": "", "nh": "LT5", "smp": "", "sw": "LT5", "a": "", "m": "LT5", "sp": "", "c": "", "soup": ""},
+            {"n": "im_akram", "r": "EU", "v": "LT5", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
+            {"n": "Crrazyy", "r": "EU", "v": "HT5", "u": "", "p": "", "nh": "", "smp": "", "sw": "HT5", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
+            {"n": "kukuuu12", "r": "NA", "v": "HT4", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
+            {"n": "qdrxp", "r": "NA", "v": "HT5", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
+            {"n": "SaifIsSafe", "r": "NA", "v": "LT5", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
+            {"n": "zpolz", "r": "EU", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "LT3", "sp": "", "c": "", "soup": ""},
+            {"n": "xtju", "r": "AS", "v": "LT3", "u": "", "p": "", "nh": "", "smp": "", "sw": "HT5", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
+            {"n": "980million", "r": "EU", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "HT4", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
+            {"n": "soggydogsniffa", "r": "NA", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "LT4", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
+            {"n": "SPYvanguard", "r": "NA", "v": "LT4", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
+            {"n": "nbuu", "r": "NA", "v": "LT3", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
+            {"n": "TriggerDigg", "r": "EU", "v": "", "u": "LT4", "p": "", "nh": "HT5", "smp": "", "sw": "HT4", "a": "LT4", "m": "", "sp": "", "c": "", "soup": ""},
+            {"n": "zkyuta", "r": "NA/SA", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "LT3", "a": "HT4", "m": "", "sp": "", "c": "", "soup": ""},
+            {"n": "zarzyy_", "r": "EU", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "HT4", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
+            {"n": "SirRazul", "r": "AS", "v": "HT5", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
+            {"n": "k6vz", "r": "EU", "v": "HT4", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
+            {"n": "Arsahka", "r": "EU", "v": "", "u": "LT3", "p": "HT5", "nh": "", "smp": "HT5", "sw": "HT4", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
+            {"n": "Sp0ng3_", "r": "NA", "v": "", "u": "", "p": "", "nh": "LT4", "smp": "", "sw": "LT3", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
+            {"n": "_0pl", "r": "EU", "v": "HT5", "u": "", "p": "", "nh": "", "smp": "", "sw": "LT3", "a": "", "m": "LT4", "sp": "", "c": "", "soup": ""},
+            {"n": "Mappengloving67", "r": "EU", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "HT4", "a": "", "m": "HT5", "sp": "", "c": "", "soup": ""},
+            {"n": "1stkira", "r": "EU", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "LT5", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
+            {"n": "_Cr7x2y_", "r": "EU", "v": "LT5", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
+            {"n": "intrtw1ned", "r": "NA", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "LT3", "sp": "", "c": "", "soup": ""},
+            {"n": "AlucardMc", "r": "EU", "v": "LT4", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
+            {"n": "mapeldrip", "r": "EU", "v": "LT4", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
+            {"n": "therealsenseimc", "r": "NA", "v": "HT4", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
+            {"n": "NotAlexAgain", "r": "EU", "v": "LT4", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
+            {"n": "BigHickRandy", "r": "NA", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "LT3", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
+            {"n": "uungo", "r": "NA", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "LT3", "sp": "", "c": "", "soup": ""},
+            {"n": "mcsnickems", "r": "NA", "v": "LT5", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
+            {"n": "Marcel1308", "r": "EU", "v": "LT5", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""}
+        ];
+
+        const icons = {
+            v: "https://raw.githubusercontent.com/misode/mcmeta/assets/assets/minecraft/textures/item/end_crystal.png", 
+            u: "https://raw.githubusercontent.com/misode/mcmeta/assets/assets/minecraft/textures/item/golden_apple.png", 
+            p: "https://raw.githubusercontent.com/misode/mcmeta/assets/assets/minecraft/textures/item/potion.png",
+            nh: "https://raw.githubusercontent.com/misode/mcmeta/assets/assets/minecraft/textures/item/splash_potion.png",
+            smp: "https://raw.githubusercontent.com/misode/mcmeta/assets/assets/minecraft/textures/item/ender_pearl.png",
+            sw: "https://raw.githubusercontent.com/misode/mcmeta/assets/assets/minecraft/textures/item/diamond_sword.png",
+            a: "https://raw.githubusercontent.com/misode/mcmeta/assets/assets/minecraft/textures/item/netherite_axe.png",
+            m: "https://raw.githubusercontent.com/misode/mcmeta/assets/assets/minecraft/textures/item/mace.png",
+            sp: "https://minecraft.wiki/images/thumb/Netherite_Spear_JE1_BE2.png/120px-Netherite_Spear_JE1_BE2.png", 
+            c: "https://raw.githubusercontent.com/misode/mcmeta/assets/assets/minecraft/textures/item/minecart.png",
+            soup: "https://raw.githubusercontent.com/misode/mcmeta/assets/assets/minecraft/textures/item/mushroom_stew.png"
+        };
+
+        const ptsMap = { "LT5": 2, "HT5": 4, "LT4": 6, "HT4": 8, "LT3": 10, "HT3": 12, "LT2": 14, "HT2": 16, "LT1": 18, "HT1": 20 };
+        
+        data.forEach(p => {
+            let total = 0;
+            Object.keys(icons).forEach(k => { if (p[k]) total += ptsMap[p[k]] || 0; });
+            p.pts = total;
+        });
+
+        data.sort((a, b) => b.pts - a.pts);
+        data.forEach((p, index) => { p.globalRank = index + 1; });
+
+        function filterLb() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const body = document.getElementById('lbTable');
+            let filtered = data.filter(p => p.n.toLowerCase().includes(query));
+            
+            body.innerHTML = filtered.map(p => {
+                const pos = p.globalRank;
+                const rClass = pos === 1 ? 'r1' : pos === 2 ? 'r2' : pos === 3 ? 'r3' : '';
+                return `
+                    <tr>
+                        <td class="rank-col ${rClass}">${pos}</td>
+                        <td>
+                            <div class="p-info">
+                                <img src="https://mineskin.eu/helm/${p.n}/40" class="p-head" onerror="this.src='https://mineskin.eu/helm/steve/40'">
+                                <span class="p-name">${p.n}</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="pts-container">
+                                <span class="pts-val">${p.pts}</span>
+                                <span class="pts-lbl">points</span>
+                            </div>
+                        </td>
+                        <td style="color:#505a73; font-weight:700;">${p.r}</td>
+                        <td>
+                            <div class="tier-list">
+                                ${Object.keys(icons).map(k => `
+                                    <div class="t-badge ${p[k] ? 'active-t' : 'dim-t'}">
+                                        <img src="${icons[k]}"> ${p[k] || '?'}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </td>
+                    </tr>`;
+            }).join('');
+        }
+        filterLb();
+    </script>
+</body>
+</html>
