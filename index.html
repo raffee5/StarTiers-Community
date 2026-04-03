@@ -173,7 +173,7 @@
             backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px);
             position: relative; z-index: 10;
             box-shadow: 0 40px 150px rgba(0,0,0,1), inset 0 4px 10px rgba(255,255,255,0.15), inset 0 -6px 15px rgba(0,0,0,0.6), 0 8px 20px rgba(88,166,255,0.2);
-            transform: perspective(1500px) rotateX(2deg);
+            /* BUG FIX: Removed 'transform: perspective(1500px) rotateX(2deg);' which caused scrolling distortion */
             animation: containerBreathe 6s infinite alternate ease-in-out;
         }
         @keyframes containerBreathe {
@@ -629,23 +629,24 @@
     </div>
 
     <script>
-        // --- ABSOLUTE CINEMA: MOUSE TRACKING AURA & DYNAMIC ROW LIGHTING ---
+// --- ABSOLUTE CINEMA: MOUSE TRACKING AURA & DYNAMIC ROW LIGHTING ---
         const cursorAura = document.getElementById('cursorAura');
         document.addEventListener('mousemove', (e) => {
             cursorAura.style.left = e.clientX + 'px';
             cursorAura.style.top = e.clientY + 'px';
             
             // --- ABSOLUTE CINEMA: PARALLAX MODAL TILT ---
+            // FIX: Using clientX/clientY instead of pageX/pageY so scrolling down doesn't flip the modal backward
             if (document.getElementById('profileModal').classList.contains('show')) {
                 const modal = document.getElementById('profileModalContent');
-                const xAxis = (window.innerWidth / 2 - e.pageX) / 25; 
-                const yAxis = (window.innerHeight / 2 - e.pageY) / 25;
+                const xAxis = (window.innerWidth / 2 - e.clientX) / 25; 
+                const yAxis = (window.innerHeight / 2 - e.clientY) / 25;
                 modal.style.transform = `scale(1) translateY(0) rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
             }
             if (document.getElementById('infoModal').classList.contains('show')) {
                 const modalInfo = document.getElementById('infoModalContent');
-                const xAxis = (window.innerWidth / 2 - e.pageX) / 35; 
-                const yAxis = (window.innerHeight / 2 - e.pageY) / 35;
+                const xAxis = (window.innerWidth / 2 - e.clientX) / 35; 
+                const yAxis = (window.innerHeight / 2 - e.clientY) / 35;
                 modalInfo.style.transform = `scale(1) translateY(0) rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
             }
             
@@ -658,7 +659,7 @@
                 row.style.setProperty('--mouse-y', `${y}px`);
             });
         });
-
+        
         const data = [
             {"n": "YammanBlox", "r": "EU", "v": "HT4", "u": "LT3", "p": "LT3", "nh": "HT3", "smp": "LT3", "sw": "LT3", "a": "", "m": "", "sp": "", "c": "HT4", "soup": "LT4"},
             {"n": "BL4ZE_1", "r": "EU", "v": "HT4", "u": "HT4", "p": "", "nh": "", "smp": "", "sw": "HT4", "a": "LT4", "m": "HT5", "sp": "", "c": "", "soup": ""},
@@ -935,6 +936,9 @@
             const tbody = document.getElementById('lbTable');
             const rows = tbody.getElementsByTagName('tr');
             for (let i = 0; i < rows.length; i++) {
+                if (rows[i].dataset.hasHover) continue; // Prevent duplicate event listeners
+                rows[i].dataset.hasHover = "true";
+
                 let color = '#58a6ff';
                 if (rows[i].querySelector('.r1')) color = '#ffcc00';
                 else if (rows[i].querySelector('.r2')) color = '#e0e0e0';
@@ -988,7 +992,30 @@
             modalPRegion.innerText = p.r || 'Unknown Region';
             modalPTitle.innerHTML = `<span class="${achievement.class}">${achievement.icon} ${achievement.name}</span>`;
             modalPPosVal.innerText = `#${p.globalRank}`;
-            modalPPtsVal.innerText = `${p.pts}`;
+            
+            // --- ABSOLUTE CINEMA: ANIMATED COUNTER FOR POINTS ---
+            const targetPts = p.pts;
+            modalPPtsVal.innerText = "0";
+            const animationDuration = 1200; // 1.2 seconds animation
+            const startTime = performance.now();
+
+            function updateCounter(currentTime) {
+                const elapsedTime = currentTime - startTime;
+                const progress = Math.min(elapsedTime / animationDuration, 1);
+                // Custom ease-out exponential logic
+                const easeProgress = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+                
+                modalPPtsVal.innerText = Math.floor(easeProgress * targetPts);
+
+                if (progress < 1) {
+                    requestAnimationFrame(updateCounter);
+                } else {
+                    modalPPtsVal.innerText = targetPts;
+                }
+            }
+            requestAnimationFrame(updateCounter);
+            // ----------------------------------------------------
+
             modalPHeadWrap.className = 'modal-p-head-wrap';
             if (p.globalRank === 1) modalPHeadWrap.classList.add('r1');
             if (p.globalRank === 2) modalPHeadWrap.classList.add('r2');
