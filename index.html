@@ -42,24 +42,27 @@
         }
 
         .cursor-aura {
-            position: fixed; width: 500px; height: 500px; border-radius: 50%;
+            position: fixed; top: 0; left: 0; width: 500px; height: 500px; border-radius: 50%;
             background: radial-gradient(circle, rgba(88,166,255,0.18) 0%, rgba(88,166,255,0.05) 30%, transparent 70%);
-            transform: translate(-50%, -50%); pointer-events: none; z-index: -1;
-            mix-blend-mode: screen; transition: width 0.2s, height 0.2s;
+            pointer-events: none; z-index: -1;
+            mix-blend-mode: screen; 
+            will-change: transform; 
+            transform: translate3d(-500px, -500px, 0); 
         }
 
         .ambient-orb {
             position: fixed; border-radius: 50%; filter: blur(160px); z-index: -3; pointer-events: none; 
             animation: floatOrb 25s infinite alternate cubic-bezier(0.4, 0, 0.2, 1);
+            will-change: transform;
         }
         .orb-1 { top: -20%; left: -10%; width: 60vw; height: 60vw; background: rgba(88, 166, 255, 0.25); }
         .orb-2 { bottom: -20%; right: -10%; width: 70vw; height: 70vw; background: rgba(88, 101, 242, 0.2); animation-delay: -7s; }
         .orb-3 { top: 30%; left: 50%; width: 50vw; height: 50vw; background: rgba(255, 204, 0, 0.15); animation-delay: -12s; }
         
         @keyframes floatOrb {
-            0% { transform: translate(0, 0) scale(1) rotate(0deg); }
-            50% { transform: translate(8vw, 10vh) scale(1.2) rotate(15deg); }
-            100% { transform: translate(-8vw, 12vh) scale(0.8) rotate(-15deg); }
+            0% { transform: translate3d(0, 0, 0) scale(1) rotate(0deg); }
+            50% { transform: translate3d(8vw, 10vh, 0) scale(1.2) rotate(15deg); }
+            100% { transform: translate3d(-8vw, 12vh, 0) scale(0.8) rotate(-15deg); }
         }
 
         body::before {
@@ -78,6 +81,7 @@
             background-size: 250px 250px;
             animation: moveParticles 90s linear infinite;
             opacity: 0.7;
+            will-change: background-position;
         }
 
         @keyframes moveParticles {
@@ -91,12 +95,13 @@
             box-shadow: 0 0 20px var(--accent), 0 0 40px var(--accent); opacity: 0;
             animation: floatUp 7s linear infinite; border-radius: 1px;
             border: 1px solid rgba(255,255,255,0.3);
+            will-change: transform, opacity;
         }
         @keyframes floatUp {
-            0% { transform: translateY(100vh) rotate(0deg) scale(0.5); opacity: 0; filter: brightness(1); }
-            20% { opacity: 1; transform: translateY(80vh) rotate(90deg) scale(1.5); filter: brightness(2); }
+            0% { transform: translate3d(0, 100vh, 0) rotate(0deg) scale(0.5); opacity: 0; filter: brightness(1); }
+            20% { opacity: 1; transform: translate3d(0, 80vh, 0) rotate(90deg) scale(1.5); filter: brightness(2); }
             80% { opacity: 0.9; }
-            100% { transform: translateY(-10vh) rotate(360deg) scale(0.5); opacity: 0; filter: brightness(1); }
+            100% { transform: translate3d(0, -10vh, 0) rotate(360deg) scale(0.5); opacity: 0; filter: brightness(1); }
         }
 
         .top-nav { display: flex; justify-content: space-between; align-items: flex-start; max-width: 1300px; margin: 0 auto 50px; gap: 30px; position: relative; z-index: 10; }
@@ -169,7 +174,6 @@
             letter-spacing: 5px; border-color: #fff;
         }
 
-        /* --- MOBILE RESPONSIVE LB CONTAINER --- */
         .lb-container { 
             max-width: 1300px; margin: 0 auto; background: var(--panel); 
             border: 2px solid var(--border); 
@@ -228,6 +232,7 @@
             background: transparent;
             border-left: 5px solid transparent; 
             z-index: 1;
+            will-change: transform, box-shadow; 
         }
         
         tr::before {
@@ -376,6 +381,7 @@
             padding: 60px; box-shadow: 0 50px 150px rgba(0,0,0,1), inset 0 4px 10px rgba(255,255,255,0.4), 0 0 120px rgba(88,166,255,0.3);
             display: flex; flex-direction: column; align-items: center; color: #eee;
             transform-style: preserve-3d; box-sizing: border-box;
+            will-change: transform; 
         }
         .modal-overlay.show .modal-content.no-js { transform: scale(1) translateY(0) rotateX(0deg); }
 
@@ -488,10 +494,11 @@
             position: absolute; width: 12px; height: 12px; border-radius: 1px; pointer-events: none; opacity: 1;
             animation: particleFloat 1s cubic-bezier(0.25, 1, 0.5, 1) forwards; z-index: 60; mix-blend-mode: screen;
             border: 1px solid rgba(255,255,255,0.3);
+            will-change: transform, opacity; 
         }
         @keyframes particleFloat {
-            0% { transform: translate(0, 0) scale(1.5) rotate(0deg); opacity: 1; filter: brightness(2.5); }
-            100% { transform: translate(calc(var(--particle-dir-x) * 150px), calc(var(--particle-dir-y) * 150px)) scale(0) rotate(180deg); opacity: 0; }
+            0% { transform: translate3d(0, 0, 0) scale(1.5) rotate(0deg); opacity: 1; filter: brightness(2.5); }
+            100% { transform: translate3d(calc(var(--particle-dir-x) * 150px), calc(var(--particle-dir-y) * 150px), 0) scale(0) rotate(180deg); opacity: 0; }
         }
 
         /* --- THE ULTIMATE MOBILE RESPONSIVE MATRIX --- */
@@ -685,186 +692,57 @@
     </div>
 
     <script>
+        // OPTIMIZATION: Throttled Mouse Tracking using requestAnimationFrame
         const cursorAura = document.getElementById('cursorAura');
+        let isMouseMoving = false;
+        let mouseX = 0;
+        let mouseY = 0;
+
         document.addEventListener('mousemove', (e) => {
-            cursorAura.style.left = e.clientX + 'px';
-            cursorAura.style.top = e.clientY + 'px';
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            
+            if (!isMouseMoving) {
+                isMouseMoving = true;
+                requestAnimationFrame(updateMouseEffects);
+            }
+        });
+
+        function updateMouseEffects() {
+            // GPU-Accelerated cursor update (subtract 250px to center the 500x500px aura)
+            cursorAura.style.transform = `translate3d(${mouseX - 250}px, ${mouseY - 250}px, 0)`;
             
             if (window.innerWidth > 850) {
                 if (document.getElementById('profileModal').classList.contains('show')) {
                     const modal = document.getElementById('profileModalContent');
-                    const xAxis = (window.innerWidth / 2 - e.clientX) / 25; 
-                    const yAxis = (window.innerHeight / 2 - e.clientY) / 25;
+                    const xAxis = (window.innerWidth / 2 - mouseX) / 25; 
+                    const yAxis = (window.innerHeight / 2 - mouseY) / 25;
                     modal.style.transform = `scale(1) translateY(0) rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
                 }
                 if (document.getElementById('infoModal').classList.contains('show')) {
                     const modalInfo = document.getElementById('infoModalContent');
-                    const xAxis = (window.innerWidth / 2 - e.clientX) / 35; 
-                    const yAxis = (window.innerHeight / 2 - e.clientY) / 35;
+                    const xAxis = (window.innerWidth / 2 - mouseX) / 35; 
+                    const yAxis = (window.innerHeight / 2 - mouseY) / 35;
                     modalInfo.style.transform = `scale(1) translateY(0) rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
                 }
-            }
-            
-            if(window.innerWidth > 850) {
+
+                // Update row spotlight
                 document.querySelectorAll('tr').forEach(row => {
                     const rect = row.getBoundingClientRect();
-                    const x = e.clientX - rect.left;
-                    const y = e.clientY - rect.top;
+                    const x = mouseX - rect.left;
+                    const y = mouseY - rect.top;
                     row.style.setProperty('--mouse-x', `${x}px`);
                     row.style.setProperty('--mouse-y', `${y}px`);
                 });
             }
-        });
+            
+            isMouseMoving = false;
+        }
 
-        // HARDCODED UPDATED DATA
-        const data = [
-            {"n": "YammanBlox", "r": "EU", "v": "HT4", "u": "LT3", "p": "HT4", "nh": "LT3", "smp": "LT3", "sw": "LT3", "a": "", "m": "", "sp": "", "c": "HT4", "soup": "LT4"},
-            {"n": "BL4ZE_1", "r": "EU", "v": "HT4", "u": "HT4", "p": "", "nh": "", "smp": "", "sw": "HT4", "a": "LT4", "m": "HT5", "sp": "", "c": "", "soup": ""},
-            {"n": "mechycj", "r": "EU", "v": "HT3", "u": "LT3", "p": "", "nh": "", "smp": "", "sw": "", "a": "HT4", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "StarryQuest8", "r": "EU", "v": "LT4", "u": "", "p": "", "nh": "", "smp": "LT4", "sw": "LT4", "a": "HT5", "m": "HT4", "sp": "LT4", "c": "", "soup": ""},
-            {"n": "IlikeSpear", "r": "EU", "v": "HT4", "u": "HT4", "p": "LT4", "nh": "", "smp": "LT3", "sw": "LT3", "a": "", "m": "HT4", "sp": "LT3", "c": "", "soup": ""},
-            {"n": "Sr_Ninhoca", "r": "EU", "v": "LT4", "u": "LT3", "p": "LT3", "nh": "LT3", "smp": "", "sw": "LT3", "a": "LT3", "m": "HT4", "sp": "", "c": "", "soup": ""},
-            {"n": "vogel_dylan", "r": "EU", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "HT5", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "collidermc", "r": "EU", "v": "LT3", "u": "HT4", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "TheGloryX", "r": "EU", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "LT4", "sp": "", "c": "", "soup": ""},
-            {"n": "Telekenisis2", "r": "EU", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "LT3", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "Darkbbu", "r": "EU", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "HT5", "sp": "", "c": "", "soup": ""},
-            {"n": "_lex", "r": "EU", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "LT3", "a": "", "m": "LT3", "sp": "", "c": "", "soup": ""},
-            {"n": "HMZ3abi", "r": "EU", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "LT4", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "TysonFriis", "r": "EU", "v": "", "u": "", "p": "", "nh": "", "smp": "LT3", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "Job64", "r": "EU/NA", "v": "HT5", "u": "", "p": "", "nh": "", "smp": "HT4", "sw": "", "a": "", "m": "", "sp": "", "c": "HT5", "soup": ""},
-            {"n": "Sezup", "r": "AS", "v": "", "u": "LT4", "p": "", "nh": "", "smp": "", "sw": "LT5", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "Nesnakomoy_KING", "r": "EU", "v": "", "u": "LT3", "p": "", "nh": "", "smp": "", "sw": "HT4", "a": "HT4", "m": "", "sp": "", "c": "HT4", "soup": ""},
-            {"n": "Rxfreshed_", "r": "EU", "v": "", "u": "LT3", "p": "", "nh": "LT4", "smp": "LT3", "sw": "HT4", "a": "LT3", "m": "LT4", "sp": "", "c": "", "soup": ""},
-            {"n": "apex000", "r": "EU", "v": "", "u": "", "p": "", "nh": "", "smp": "HT5", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "Swaywasaspotify", "r": "EU", "v": "HT5", "u": "", "p": "", "nh": "", "smp": "", "sw": "LT3", "a": "", "m": "LT3", "sp": "", "c": "", "soup": ""},
-            {"n": "overly23", "r": "EU", "v": "", "u": "", "p": "", "nh": "LT5", "smp": "", "sw": "HT4", "a": "LT4", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "SpecterDeath_", "r": "EU", "v": "LT4", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "majdbadran11", "r": "EU", "v": "HT4", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "CpvpMaster", "r": "EU", "v": "LT3", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "kanveet_Gamer", "r": "EU", "v": "LT5", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "MacroAbuser", "r": "EU", "v": "HT4", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "CuriosityMC", "r": "AS", "v": "", "u": "", "p": "", "nh": "", "smp": "LT4", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "wemmbus2", "r": "EU", "v": "", "u": "", "p": "", "nh": "LT5", "smp": "", "sw": "LT5", "a": "", "m": "LT5", "sp": "", "c": "", "soup": ""},
-            {"n": "im_akram", "r": "EU", "v": "LT5", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "Crrazyy", "r": "EU", "v": "HT5", "u": "", "p": "", "nh": "", "smp": "", "sw": "HT5", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "kukuuu12", "r": "NA", "v": "HT4", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "qdrxp", "r": "NA", "v": "HT5", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "SaifIsSafe", "r": "NA", "v": "LT5", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "zpolz", "r": "EU", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "LT3", "sp": "", "c": "", "soup": ""},
-            {"n": "xtju", "r": "AS", "v": "HT3", "u": "", "p": "HT4", "nh": "LT3", "smp": "", "sw": "HT5", "a": "LT4", "m": "", "sp": "", "c": "HT3", "soup": ""},
-            {"n": "980million", "r": "EU", "v": "HT5", "u": "", "p": "", "nh": "", "smp": "", "sw": "HT4", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "soggydogsniffa", "r": "NA", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "LT4", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "SPYvanguard", "r": "NA", "v": "LT4", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "nbuu", "r": "NA", "v": "LT3", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "TriggerDigg", "r": "EU", "v": "LT5", "u": "LT4", "p": "", "nh": "HT5", "smp": "", "sw": "HT4", "a": "LT4", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "zkyuta", "r": "NA", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "LT3", "a": "HT4", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "zarzyy_", "r": "EU", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "HT4", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "SirRazul", "r": "AS", "v": "HT5", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "k6vz", "r": "EU", "v": "HT4", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "Arsahka", "r": "EU", "v": "", "u": "LT3", "p": "HT5", "nh": "", "smp": "HT5", "sw": "HT4", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "Sp0ng3_", "r": "NA", "v": "", "u": "", "p": "", "nh": "LT4", "smp": "", "sw": "LT3", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "_0pl", "r": "EU", "v": "HT5", "u": "", "p": "", "nh": "", "smp": "", "sw": "HT4", "a": "", "m": "LT4", "sp": "", "c": "HT4", "soup": ""},
-            {"n": "Mappengloving67", "r": "EU", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "HT4", "a": "", "m": "HT5", "sp": "", "c": "", "soup": ""},
-            {"n": "1stkira", "r": "EU", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "LT5", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "_Cr7x2y_", "r": "EU", "v": "HT4", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "HT4", "soup": ""},
-            {"n": "intrtw1ned", "r": "NA", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "LT3", "sp": "", "c": "", "soup": ""},
-            {"n": "AlucardMc", "r": "EU", "v": "HT5", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "HT4", "sp": "", "c": "", "soup": ""},
-            {"n": "mapeldrip", "r": "EU", "v": "LT4", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "HT5", "sp": "", "c": "", "soup": ""},
-            {"n": "therealsenseimc", "r": "NA", "v": "HT4", "u": "", "p": "", "nh": "HT5", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "NotAlexAgain", "r": "EU", "v": "LT4", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "BigHickRandy", "r": "NA", "v": "", "u": "", "p": "LT3", "nh": "", "smp": "", "sw": "LT3", "a": "", "m": "LT3", "sp": "LT3", "c": "", "soup": ""},
-            {"n": "uungo", "r": "NA", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "LT3", "sp": "", "c": "", "soup": ""},
-            {"n": "mcsnickems", "r": "NA", "v": "LT5", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "Marcel1308", "r": "EU", "v": "LT5", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "giove123", "r": "EU", "v": "LT5", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "Jackieechannn", "r": "NA", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "LT4", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "juniorcaos", "r": "EU", "v": "LT5", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "SillyFlowers", "r": "EU", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "HT5", "sp": "", "c": "", "soup": ""},
-            {"n": "JimmyOtakuuu", "r": "EU", "v": "", "u": "LT4", "p": "", "nh": "", "smp": "LT4", "sw": "", "a": "", "m": "HT5", "sp": "", "c": "", "soup": ""},
-            {"n": "Bakli", "r": "EU", "v": "LT3", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "Lassukka_", "r": "EU", "v": "LT5", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "Nehaan12", "r": "EU", "v": "LT5", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "nikosCPvP", "r": "EU", "v": "HT5", "u": "", "p": "", "nh": "", "smp": "", "sw": "LT5", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "SmogBorn", "r": "EU", "v": "LT4", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "DEDGUY_", "r": "AS", "v": "LT4", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": "HT5"},
-            {"n": "fraudity", "r": "EU", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "LT4", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "_SpeedPvP_", "r": "AS", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "LT5", "sp": "", "c": "", "soup": ""},
-            {"n": "oxivity", "r": "EU", "v": "HT5", "u": "", "p": "", "nh": "", "smp": "", "sw": "HT4", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "Goat_Loki", "r": "EU", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "LT4", "a": "", "m": "HT5", "sp": "", "c": "", "soup": ""},
-            {"n": "AB_Pider", "r": "AS", "v": "LT3", "u": "", "p": "", "nh": "LT3", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "MrFardin", "r": "AS", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "HT4", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "UnWarmed", "r": "AS", "v": "LT4", "u": "", "p": "", "nh": "", "smp": "", "sw": "LT3", "a": "", "m": "", "sp": "", "c": "", "soup": "HT5"},
-            {"n": "Tudor07", "r": "EU", "v": "HT4", "u": "", "p": "", "nh": "", "smp": "", "sw": "HT4", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "MrDqcks", "r": "EU", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "LT3", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "DxrkHxnter", "r": "EU", "v": "LT4", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "duddleton12", "r": "EU", "v": "HT5", "u": "", "p": "", "nh": "", "smp": "", "sw": "LT5", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "PatrikSlo", "r": "EU", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "LT5", "sp": "", "c": "", "soup": ""},
-            {"n": "Agent_Mikra", "r": "EU", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "LT3", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "Princelez", "r": "AS", "v": "HT4", "u": "", "p": "", "nh": "LT3", "smp": "", "sw": "LT3", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "DrippinIsCool", "r": "EU", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "LT4", "a": "", "m": "HT4", "sp": "", "c": "", "soup": ""},
-            {"n": "YellowCrafted", "r": "AS", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "LT4", "a": "", "m": "LT3", "sp": "", "c": "", "soup": ""},
-            {"n": "Relloadz", "r": "NA", "v": "LT3", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "d3vi", "r": "NA", "v": "HT4", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "CalfonsoY", "r": "EU", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "HT4", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "oIsar", "r": "EU", "v": "", "u": "", "p": "LT5", "nh": "HT5", "smp": "HT5", "sw": "HT4", "a": "LT5", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "FlexYT1", "r": "EU", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "HT4", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "Defendi1", "r": "EU", "v": "LT4", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "HT5", "sp": "", "c": "", "soup": "LT4"},
-            {"n": "AS Fluexxy", "r": "AS", "v": "LT4", "u": "", "p": "", "nh": "", "smp": "", "sw": "HT4", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "br0myy", "r": "EU", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "LT3", "a": "", "m": "", "sp": "", "c": "LT4", "soup": ""},
-            {"n": "tsvndere", "r": "NA", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "LT1", "sp": "", "c": "", "soup": ""},
-            {"n": "BakarX", "r": "AS", "v": "HT5", "u": "LT3", "p": "", "nh": "", "smp": "LT5", "sw": "", "a": "HT5", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "qube212", "r": "EU", "v": "HT4", "u": "", "p": "", "nh": "HT5", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "ErMav", "r": "EU", "v": "", "u": "", "p": "HT5", "nh": "", "smp": "LT5", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "kvazarniy", "r": "EU", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "HT5", "a": "", "m": "", "sp": "", "c": "", "soup": "LT5"},
-            {"n": "shrimp_jfk", "r": "EU", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "LT5", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "fearmyego", "r": "EU", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "LT5", "a": "", "m": "", "sp": "", "c": "", "soup": "LT5"},
-            {"n": "123", "r": "EU", "v": "", "u": "", "p": "", "nh": "HT4", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": "LT4"},
-            {"n": "D932a", "r": "EU", "v": "", "u": "", "p": "", "nh": "HT5", "smp": "", "sw": "HT4", "a": "", "m": "", "sp": "", "c": "LT4", "soup": "HT5"},
-            {"n": "Randomize0798", "r": "NA", "v": "LT5", "u": "", "p": "", "nh": "", "smp": "", "sw": "HT5", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "JM_0105", "r": "EU", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "LT4", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "X1N0_D", "r": "NA", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "LT3", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "4vor", "r": "AS", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "HT4", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "_Thatoneguy0", "r": "NA", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "HT5", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "maciekzhool ASIA", "r": "AS", "v": "HT5", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "HT5", "soup": "HT4"},
-            {"n": "mandshuk", "r": "AS", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "HT4", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "Zain_Qaiser", "r": "NA", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "HT4", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "Dragonm41612", "r": "AS", "v": "HT5", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "ZoruboGaming", "r": "AS", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": "LT5"},
-            {"n": "apolloisaugustus", "r": "EU", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "LT3", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "Tenzell", "r": "NA", "v": "", "u": "", "p": "", "nh": "HT5", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "_Goofier", "r": "NA", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "LT3", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "maneqear", "r": "EU", "v": "", "u": "", "p": "", "nh": "LT5", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "Hung__Tien", "r": "AS", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": "HT5"},
-            {"n": "DriftWHY", "r": "AS", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "HT4", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "3frxn3", "r": "EU", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": "LT4"},
-            {"n": "Nuwtyy", "r": "AS", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "LT4", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "0kbx", "r": "EU", "v": "HT3", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "mostswag", "r": "EU", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "LT3", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "shizzlejhizzle", "r": "NA", "v": "HT5", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "wviscool", "r": "EU", "v": "LT4", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "LT4", "soup": ""},
-            {"n": "MilkIsGod", "r": "EU", "v": "HT4", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "__lex_", "r": "EU", "v": "", "u": "HT5", "p": "", "nh": "", "smp": "", "sw": "LT3", "a": "", "m": "HT4", "sp": "HT4", "c": "", "soup": ""},
-            {"n": "General1133", "r": "EU", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "HT5", "a": "", "m": "LT4", "sp": "", "c": "LT4", "soup": ""},
-            {"n": "FrogArmyNumber1", "r": "EU", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "LT4", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "wtwgio", "r": "NA", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "HT4", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "PhoenixN1", "r": "AS", "v": "", "u": "", "p": "", "nh": "HT5", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "zuckerl", "r": "EU", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "LT3", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "Xx_Auqa", "r": "EU", "v": "LT4", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "LT4", "soup": ""},
-            {"n": "gep_", "r": "EU", "v": "", "u": "", "p": "", "nh": "LT4", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "xRaaif", "r": "AS", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "HT4", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "sichl", "r": "EU", "v": "", "u": "", "p": "", "nh": "LT3", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "0fenKartoffeln", "r": "EU", "v": "HT5", "u": "", "p": "", "nh": "", "smp": "", "sw": "HT5", "a": "", "m": "", "sp": "", "c": "LT4", "soup": "HT5"},
-            {"n": "K4rtoffelsalat", "r": "EU", "v": "LT4", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "LT4", "soup": ""},
-            {"n": "Elionemelone", "r": "EU", "v": "LT4", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "LT4", "soup": ""},
-            {"n": "FloonsMC", "r": "EU", "v": "LT4", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "LT3", "soup": ""},
-            {"n": "youngAR0", "r": "NA", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "LT4", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "Sp0ng3_", "r": "NA", "v": "", "u": "", "p": "", "nh": "LT4", "smp": "", "sw": "LT3", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "Goatedonyx", "r": "NA", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "LT3", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "Vex1067pocYT", "r": "AS", "v": "HT5", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "HT5", "soup": ""},
-            {"n": "L985DEC", "r": "EU", "v": "LT4", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "LT4", "soup": ""},
-            {"n": "suscrafter9988", "r": "EU", "v": "LT4", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "LT4", "soup": ""}
-        ];
+        // =========================================================
+        // LIVE DATABASE SYNC (Replaces hardcoded data)
+        // =========================================================
+        let data = [];
 
         const icons = {
             v: "https://raw.githubusercontent.com/misode/mcmeta/assets/assets/minecraft/textures/item/end_crystal.png", 
@@ -885,15 +763,6 @@
             "HT3": 15, "LT2": 20, "HT2": 25, "LT1": 40, "HT1": 50 
         };
         
-        data.forEach(p => {
-            let total = 0;
-            Object.keys(icons).forEach(k => { if (p[k]) total += ptsMap[p[k]] || 0; });
-            p.pts = total;
-        });
-        
-        data.sort((a, b) => b.pts - a.pts);
-        data.forEach((p, index) => { p.globalRank = index + 1; });
-
         function getAchievement(pts) {
             if (pts >= 400) return { name: "Combat Grandmaster", class: "title-grandmaster", icon: "✨" };
             if (pts >= 250) return { name: "Combat Master", class: "title-master", icon: "✦" };
@@ -902,6 +771,38 @@
             if (pts >= 20)  return { name: "Combat Cadet", class: "title-cadet", icon: "○" };
             if (pts >= 10)  return { name: "Combat Novice", class: "title-novice", icon: "⌖" };
             return { name: "Rookie", class: "title-rookie", icon: "⸰" };
+        }
+
+        async function loadLeaderboardData() {
+            try {
+                // The ?t= timestamp completely completely prevents browser caching
+                const response = await fetch('players.json?t=' + new Date().getTime());
+                if (!response.ok) throw new Error("Could not fetch players.json");
+                
+                data = await response.json();
+
+                // Calculate points and assign global ranks dynamically
+                data.forEach(p => {
+                    let total = 0;
+                    Object.keys(icons).forEach(k => { if (p[k]) total += ptsMap[p[k]] || 0; });
+                    p.pts = total;
+                });
+                
+                data.sort((a, b) => b.pts - a.pts);
+                data.forEach((p, index) => { p.globalRank = index + 1; });
+
+                // Render the table
+                filterLb(true);
+
+            } catch (error) {
+                console.error("Database Sync Error:", error);
+                document.getElementById('lbTable').innerHTML = `
+                    <tr>
+                        <td colspan="5" style="text-align:center; padding:40px; color:#ff5252; font-weight:900; letter-spacing:2px; text-transform:uppercase;">
+                            ⚠️ Loading player data... Make sure players.json is uploaded to GitHub.
+                        </td>
+                    </tr>`;
+            }
         }
 
         function openInfoModal() {
@@ -923,7 +824,8 @@
         }
 
         let currentPage = 1;
-        const itemsPerPage = 20;
+        // OPTIMIZATION: Reduced from 20 to 10 elements per page
+        const itemsPerPage = 10;
         let currentFilteredData = [];
 
         function filterLb(isReset = true) {
@@ -995,7 +897,7 @@
             const tbody = document.getElementById('lbTable');
             const rows = tbody.getElementsByTagName('tr');
             for (let i = 0; i < rows.length; i++) {
-                if (rows[i].dataset.hasHover) continue; // Prevent duplicate event listeners
+                if (rows[i].dataset.hasHover) continue;
                 rows[i].dataset.hasHover = "true";
 
                 let color = '#58a6ff';
@@ -1011,27 +913,26 @@
         function createRowParticles(row, color) {
             if(window.innerWidth < 1000) return;
             clearInterval(row.particleInterval); 
-            // Greatly reduced particle spawn rate for a cleaner look
             row.particleInterval = setInterval(() => {
-                for (let i = 0; i < 2; i++) { // Max 2 particles per interval
-                    const particle = document.createElement('div'); // Square divs
+                for (let i = 0; i < 2; i++) {
+                    const particle = document.createElement('div');
                     particle.className = 'row-particle';
                     particle.style.background = color;
                     particle.style.boxShadow = `0 0 15px ${color}, 0 0 30px ${color}`;
                     const rect = row.getBoundingClientRect();
                     const top = rect.top + (rect.height / 2) + (Math.random() - 0.5) * rect.height * 1.5;
                     const left = rect.left + rect.width / 2 + (Math.random() - 0.5) * rect.width * 1.2;
-                    particle.style.top = `${top}px`;
-                    particle.style.left = `${left}px`;
+                    // OPTIMIZATION: Hardware accelerated particle positioning
+                    particle.style.transform = `translate3d(${left}px, ${top}px, 0)`;
                     particle.style.setProperty('--particle-dir-x', (Math.random() - 0.5) * 4);
                     particle.style.setProperty('--particle-dir-y', (Math.random() - 0.5) * 4);
                     document.body.appendChild(particle);
                     setTimeout(() => { particle.remove(); }, 800); 
                 }
-            }, 120); // Slower interval
+            }, 120);
         }
 
-        let skinViewer = null; // Store 3D viewer globally
+        let skinViewer = null;
         const modalOverlay = document.getElementById('profileModal');
         const modalPHeadWrap = document.getElementById('modalPHeadWrap');
         const modalPHead = document.getElementById('modalPHead');
@@ -1046,7 +947,6 @@
             const p = data.find(player => player.n === playerName);
             if (!p) return;
 
-            // Dispose old 3D model properly
             if (skinViewer) {
                 skinViewer.dispose();
                 skinViewer = null;
@@ -1060,7 +960,6 @@
             modalPTitle.innerHTML = `<span class="${achievement.class}">${achievement.icon} ${achievement.name}</span>`;
             modalPPosVal.innerText = `#${p.globalRank}`;
             
-            // ANIMATED COUNTER FOR POINTS
             const targetPts = p.pts;
             modalPPtsVal.innerText = "0";
             const animationDuration = 1200; 
@@ -1107,7 +1006,6 @@
                 document.getElementById('profileModalContent').style.transform = `scale(1) translateY(0) rotateX(0deg) rotateY(0deg)`;
             }
 
-            // Initialize 3D Viewer inside modalSkinContainer with a tiny delay
             const modalSkinContainer = document.getElementById('modalSkinContainer');
             if (modalSkinContainer) {
                 modalSkinContainer.innerHTML = '';
@@ -1145,8 +1043,6 @@
             for(let i = 0; i < 8; i++) {
                 let spark = document.createElement('div');
                 spark.style.position = 'fixed';
-                spark.style.left = e.clientX + 'px';
-                spark.style.top = e.clientY + 'px';
                 spark.style.width = '10px';
                 spark.style.height = '10px';
                 spark.style.background = ['#58a6ff', '#5865F2', '#ffffff', '#ffcc00', '#ff5252'][Math.floor(Math.random() * 5)];
@@ -1156,9 +1052,11 @@
                 spark.style.borderRadius = '1px'; 
                 spark.style.border = '1px solid rgba(255,255,255,0.4)';
                 spark.style.transition = 'all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                // OPTIMIZATION: Use translate3d for the sparks
+                spark.style.transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0)`;
                 document.body.appendChild(spark);
                 setTimeout(() => {
-                    spark.style.transform = `translate(${(Math.random() - 0.5) * 200}px, ${(Math.random() - 0.5) * 200}px) scale(0) rotate(${Math.random() * 360}deg)`;
+                    spark.style.transform = `translate3d(${e.clientX + (Math.random() - 0.5) * 200}px, ${e.clientY + (Math.random() - 0.5) * 200}px, 0) scale(0) rotate(${Math.random() * 360}deg)`;
                     spark.style.opacity = '0';
                 }, 10);
                 setTimeout(() => spark.remove(), 500);
@@ -1178,7 +1076,9 @@
         }
         
         initFloatingDust();
-        filterLb();
+        
+        // Load the live data on startup!
+        loadLeaderboardData();
     </script>
 </body>
 </html>
