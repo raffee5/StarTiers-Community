@@ -740,7 +740,7 @@
         }
 
         // =========================================================
-        // LIVE DATABASE SYNC (Replaces hardcoded data)
+        // LIVE DATABASE SYNC WITH ANTI-CACHE
         // =========================================================
         let data = [];
 
@@ -775,7 +775,7 @@
 
         async function loadLeaderboardData() {
             try {
-                // The ?t= timestamp completely completely prevents browser caching
+                // BUG FIX: The ?t= timestamp completely prevents browser caching
                 const response = await fetch('players.json?t=' + new Date().getTime());
                 if (!response.ok) throw new Error("Could not fetch players.json");
                 
@@ -824,11 +824,13 @@
         }
 
         let currentPage = 1;
-        // OPTIMIZATION: Reduced from 20 to 10 elements per page
         const itemsPerPage = 10;
         let currentFilteredData = [];
+        let isFetchingPage = false; // BUG FIX: Anti-Crash Lock for mobile scroll spam
 
         function filterLb(isReset = true) {
+            if (isFetchingPage && !isReset) return; // Prevent scroll spam from crashing the browser
+
             const query = document.getElementById('searchInput').value.toLowerCase();
             const body = document.getElementById('lbTable');
             
@@ -838,13 +840,17 @@
                 body.innerHTML = ''; 
             } else {
                 currentPage++;
+                isFetchingPage = true; // Lock scroll fetching
             }
 
             const start = (currentPage - 1) * itemsPerPage;
             const end = start + itemsPerPage;
             const chunk = currentFilteredData.slice(start, end);
 
-            if (chunk.length === 0 && !isReset) return;
+            if (chunk.length === 0 && !isReset) {
+                isFetchingPage = false; // Unlock if there's no more data
+                return;
+            }
 
             const htmlContent = chunk.map((p, i) => {
                 const pos = p.globalRank;
@@ -891,6 +897,15 @@
             }
 
             addParticleHoverToRows();
+
+            // Unlock fetching after a short delay so DOM can update and stop rapid-firing scroll events
+            if (!isReset) {
+                requestAnimationFrame(() => {
+                    setTimeout(() => {
+                        isFetchingPage = false;
+                    }, 200);
+                });
+            }
         }
 
         function addParticleHoverToRows() {
@@ -922,7 +937,6 @@
                     const rect = row.getBoundingClientRect();
                     const top = rect.top + (rect.height / 2) + (Math.random() - 0.5) * rect.height * 1.5;
                     const left = rect.left + rect.width / 2 + (Math.random() - 0.5) * rect.width * 1.2;
-                    // OPTIMIZATION: Hardware accelerated particle positioning
                     particle.style.transform = `translate3d(${left}px, ${top}px, 0)`;
                     particle.style.setProperty('--particle-dir-x', (Math.random() - 0.5) * 4);
                     particle.style.setProperty('--particle-dir-y', (Math.random() - 0.5) * 4);
@@ -1034,8 +1048,9 @@
         }
 
         window.addEventListener('scroll', () => {
-            if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 150) {
-                filterLb(false);
+            // BUG FIX: Added Math.ceil for safer cross-browser compatibility
+            if (Math.ceil(window.innerHeight + window.scrollY) >= document.documentElement.scrollHeight - 200) {
+                if (!isFetchingPage) filterLb(false);
             }
         });
 
@@ -1052,7 +1067,6 @@
                 spark.style.borderRadius = '1px'; 
                 spark.style.border = '1px solid rgba(255,255,255,0.4)';
                 spark.style.transition = 'all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
-                // OPTIMIZATION: Use translate3d for the sparks
                 spark.style.transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0)`;
                 document.body.appendChild(spark);
                 setTimeout(() => {
