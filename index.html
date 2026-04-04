@@ -1,4 +1,4 @@
-z<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -81,7 +81,6 @@ z<!DOCTYPE html>
             background-size: 250px 250px;
             animation: moveParticles 90s linear infinite;
             opacity: 0.7;
-            will-change: background-position;
         }
 
         @keyframes moveParticles {
@@ -95,7 +94,6 @@ z<!DOCTYPE html>
             box-shadow: 0 0 20px var(--accent), 0 0 40px var(--accent); opacity: 0;
             animation: floatUp 7s linear infinite; border-radius: 1px;
             border: 1px solid rgba(255,255,255,0.3);
-            will-change: transform, opacity;
         }
         @keyframes floatUp {
             0% { transform: translate3d(0, 100vh, 0) rotate(0deg) scale(0.5); opacity: 0; filter: brightness(1); }
@@ -232,7 +230,6 @@ z<!DOCTYPE html>
             background: transparent;
             border-left: 5px solid transparent; 
             z-index: 1;
-            will-change: transform, box-shadow; 
         }
         
         tr::before {
@@ -381,7 +378,6 @@ z<!DOCTYPE html>
             padding: 60px; box-shadow: 0 50px 150px rgba(0,0,0,1), inset 0 4px 10px rgba(255,255,255,0.4), 0 0 120px rgba(88,166,255,0.3);
             display: flex; flex-direction: column; align-items: center; color: #eee;
             transform-style: preserve-3d; box-sizing: border-box;
-            will-change: transform; 
         }
         .modal-overlay.show .modal-content.no-js { transform: scale(1) translateY(0) rotateX(0deg); }
 
@@ -489,17 +485,6 @@ z<!DOCTYPE html>
         .modal-t-badge img { width: 28px; height: 28px; image-rendering: pixelated; filter: drop-shadow(0 4px 5px rgba(0,0,0,1)); transition: 0.4s;}
         .modal-t-badge.active { color: white; background: linear-gradient(135deg, rgba(255,255,255,0.2), rgba(0,0,0,0.98)); border-color: rgba(255,255,255,0.4); }
         .modal-t-badge.inactive { opacity: 0.15; filter: grayscale(1) contrast(0.5); border-color: rgba(255,255,255,0.03) !important; box-shadow: none !important; }
-
-        .row-particle {
-            position: absolute; width: 12px; height: 12px; border-radius: 1px; pointer-events: none; opacity: 1;
-            animation: particleFloat 1s cubic-bezier(0.25, 1, 0.5, 1) forwards; z-index: 60; mix-blend-mode: screen;
-            border: 1px solid rgba(255,255,255,0.3);
-            will-change: transform, opacity; 
-        }
-        @keyframes particleFloat {
-            0% { transform: translate3d(0, 0, 0) scale(1.5) rotate(0deg); opacity: 1; filter: brightness(2.5); }
-            100% { transform: translate3d(calc(var(--particle-dir-x) * 150px), calc(var(--particle-dir-y) * 150px), 0) scale(0) rotate(180deg); opacity: 0; }
-        }
 
         /* --- THE ULTIMATE MOBILE RESPONSIVE MATRIX --- */
         @media (max-width: 850px) {
@@ -692,7 +677,6 @@ z<!DOCTYPE html>
     </div>
 
     <script>
-        // OPTIMIZATION: Throttled Mouse Tracking using requestAnimationFrame
         const cursorAura = document.getElementById('cursorAura');
         let isMouseMoving = false;
         let mouseX = 0;
@@ -709,7 +693,6 @@ z<!DOCTYPE html>
         });
 
         function updateMouseEffects() {
-            // GPU-Accelerated cursor update (subtract 250px to center the 500x500px aura)
             cursorAura.style.transform = `translate3d(${mouseX - 250}px, ${mouseY - 250}px, 0)`;
             
             if (window.innerWidth > 850) {
@@ -726,7 +709,6 @@ z<!DOCTYPE html>
                     modalInfo.style.transform = `scale(1) translateY(0) rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
                 }
 
-                // Update row spotlight
                 document.querySelectorAll('tr').forEach(row => {
                     const rect = row.getBoundingClientRect();
                     const x = mouseX - rect.left;
@@ -764,7 +746,7 @@ z<!DOCTYPE html>
         };
         
         function getAchievement(pts) {
-            if (pts >= 400) return { name: "Combat Grandmaster", class: "title-grandmaster", icon: "✧" };
+            if (pts >= 400) return { name: "Combat Grandmaster", class: "title-grandmaster", icon: "✨" };
             if (pts >= 250) return { name: "Combat Master", class: "title-master", icon: "✦" };
             if (pts >= 100) return { name: "Combat Ace", class: "title-ace", icon: "❖" };
             if (pts >= 50)  return { name: "Combat Specialist", class: "title-specialist", icon: "✧" };
@@ -775,13 +757,11 @@ z<!DOCTYPE html>
 
         async function loadLeaderboardData() {
             try {
-                // BUG FIX: The ?t= timestamp completely prevents browser caching
                 const response = await fetch('players.json?t=' + new Date().getTime());
                 if (!response.ok) throw new Error("Could not fetch players.json");
                 
                 data = await response.json();
 
-                // Calculate points and assign global ranks dynamically
                 data.forEach(p => {
                     let total = 0;
                     Object.keys(icons).forEach(k => { if (p[k]) total += ptsMap[p[k]] || 0; });
@@ -791,7 +771,6 @@ z<!DOCTYPE html>
                 data.sort((a, b) => b.pts - a.pts);
                 data.forEach((p, index) => { p.globalRank = index + 1; });
 
-                // Render the table
                 filterLb(true);
 
             } catch (error) {
@@ -826,29 +805,34 @@ z<!DOCTYPE html>
         let currentPage = 1;
         const itemsPerPage = 10;
         let currentFilteredData = [];
-        let isFetchingPage = false; // BUG FIX: Anti-Crash Lock for mobile scroll spam
+        let isFetchingPage = false; 
+        let hasMoreData = true; // SCROLL BUG FIX: Master lock for end of list
 
         function filterLb(isReset = true) {
-            if (isFetchingPage && !isReset) return; // Prevent scroll spam from crashing the browser
+            if (isFetchingPage) return; 
+            if (!isReset && !hasMoreData) return; // SCROLL BUG FIX: Stop fetching if no more data exists
 
             const query = document.getElementById('searchInput').value.toLowerCase();
             const body = document.getElementById('lbTable');
             
             if (isReset) {
                 currentPage = 1;
+                hasMoreData = true;
                 currentFilteredData = data.filter(p => p.n.toLowerCase().includes(query));
                 body.innerHTML = ''; 
             } else {
                 currentPage++;
-                isFetchingPage = true; // Lock scroll fetching
+                isFetchingPage = true; 
             }
 
             const start = (currentPage - 1) * itemsPerPage;
             const end = start + itemsPerPage;
             const chunk = currentFilteredData.slice(start, end);
 
-            if (chunk.length === 0 && !isReset) {
-                isFetchingPage = false; // Unlock if there's no more data
+            // SCROLL BUG FIX: If we hit the end of the list, permanently lock the scroll
+            if (chunk.length === 0) {
+                hasMoreData = false;
+                isFetchingPage = false;
                 return;
             }
 
@@ -898,13 +882,10 @@ z<!DOCTYPE html>
 
             addParticleHoverToRows();
 
-            // Unlock fetching after a short delay so DOM can update and stop rapid-firing scroll events
             if (!isReset) {
-                requestAnimationFrame(() => {
-                    setTimeout(() => {
-                        isFetchingPage = false;
-                    }, 200);
-                });
+                setTimeout(() => {
+                    isFetchingPage = false;
+                }, 300); // Wait 300ms before allowing another fetch to prevent spam
             }
         }
 
@@ -956,15 +937,11 @@ z<!DOCTYPE html>
         const modalPPosVal = document.getElementById('modalPPosVal');
         const modalPPtsVal = document.getElementById('modalPPtsVal');
         const modalTiersGrid = document.getElementById('modalTiersGrid');
+        const modalSkinContainer = document.getElementById('modalSkinContainer');
 
         function openProfile(playerName) {
             const p = data.find(player => player.n === playerName);
             if (!p) return;
-
-            if (skinViewer) {
-                skinViewer.dispose();
-                skinViewer = null;
-            }
 
             const achievement = getAchievement(p.pts);
             modalPHead.src = `https://mineskin.eu/helm/${p.n}/128`;
@@ -1020,21 +997,22 @@ z<!DOCTYPE html>
                 document.getElementById('profileModalContent').style.transform = `scale(1) translateY(0) rotateX(0deg) rotateY(0deg)`;
             }
 
-            const modalSkinContainer = document.getElementById('modalSkinContainer');
-            if (modalSkinContainer) {
-                modalSkinContainer.innerHTML = '';
-                setTimeout(() => {
-                    skinViewer = new skinview3d.SkinViewer({
-                        canvas: document.createElement("canvas"),
-                        width: 280,
-                        height: 380,
-                        skin: `https://mineskin.eu/skin/${p.n}`
-                    });
-                    modalSkinContainer.appendChild(skinViewer.canvas);
-                    skinViewer.autoRotate = true;
-                    skinViewer.autoRotateSpeed = 0.6;
-                    skinViewer.controls.enableZoom = false;
-                }, 50);
+            // 3D VIEWER MEMORY LEAK FIX
+            // Instead of deleting and re-creating the heavy WebGL canvas 
+            // we create it ONCE and just swap the skin texture!
+            if (!skinViewer) {
+                skinViewer = new skinview3d.SkinViewer({
+                    canvas: document.createElement("canvas"),
+                    width: 280,
+                    height: 380,
+                    skin: `https://mineskin.eu/skin/${p.n}`
+                });
+                modalSkinContainer.appendChild(skinViewer.canvas);
+                skinViewer.autoRotate = true;
+                skinViewer.autoRotateSpeed = 0.6;
+                skinViewer.controls.enableZoom = false;
+            } else {
+                skinViewer.loadSkin(`https://mineskin.eu/skin/${p.n}`);
             }
         }
 
@@ -1047,11 +1025,16 @@ z<!DOCTYPE html>
             if (e.target === modalOverlay) closeProfile();
         }
 
+        // SCROLL BUG FIX: Throttled Scroll Listener to completely prevent infinite fetching loops
+        let scrollTimeout = null;
         window.addEventListener('scroll', () => {
-            // BUG FIX: Added Math.ceil for safer cross-browser compatibility
-            if (Math.ceil(window.innerHeight + window.scrollY) >= document.documentElement.scrollHeight - 200) {
-                if (!isFetchingPage) filterLb(false);
-            }
+            if (scrollTimeout) return;
+            scrollTimeout = setTimeout(() => {
+                if (Math.ceil(window.innerHeight + window.scrollY) >= document.documentElement.scrollHeight - 300) {
+                    if (!isFetchingPage && hasMoreData) filterLb(false);
+                }
+                scrollTimeout = null;
+            }, 100); 
         });
 
         document.addEventListener('click', function(e) {
@@ -1079,7 +1062,9 @@ z<!DOCTYPE html>
 
         function initFloatingDust() {
             const container = document.getElementById('mcDustContainer');
-            for(let i = 0; i < 60; i++) {
+            // MOBILE OPTIMIZATION: Only spawn 25 particles on phones to save VRAM
+            const dustCount = window.innerWidth > 850 ? 60 : 25; 
+            for(let i = 0; i < dustCount; i++) {
                 let dust = document.createElement('div');
                 dust.className = 'mc-dust';
                 dust.style.left = Math.random() * 100 + 'vw';
