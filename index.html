@@ -17,11 +17,9 @@
             --neon-glow: rgba(88, 166, 255, 0.8);
         }
 
-        /* --- ABSOLUTE CINEMA: SMOOTH SCROLL & SELECTION --- */
         html { scroll-behavior: smooth; }
         ::selection { background: var(--accent); color: #fff; text-shadow: 0 0 10px #fff; }
 
-        /* Custom Scrollbar for better UI on Desktop and Mobile */
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: rgba(0,0,0,0.5); border-radius: 10px; }
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
@@ -37,14 +35,12 @@
             position: relative;
         }
 
-        /* --- ABSOLUTE CINEMA: DEEP CLEAN VIGNETTE (NO GRILL) --- */
         body::after {
             content: ""; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: radial-gradient(circle at center, transparent 20%, rgba(0,0,0,0.98) 150%);
             z-index: 9998; pointer-events: none;
         }
 
-        /* --- ABSOLUTE CINEMA: INTERACTIVE CURSOR AURA --- */
         .cursor-aura {
             position: fixed; width: 500px; height: 500px; border-radius: 50%;
             background: radial-gradient(circle, rgba(88,166,255,0.18) 0%, rgba(88,166,255,0.05) 30%, transparent 70%);
@@ -183,7 +179,6 @@
             position: relative; z-index: 10;
             box-shadow: 0 40px 150px rgba(0,0,0,1), inset 0 4px 10px rgba(255,255,255,0.15), inset 0 -6px 15px rgba(0,0,0,0.6), 0 8px 20px rgba(88,166,255,0.2);
             animation: containerBreathe 6s infinite alternate ease-in-out;
-            /* Allow smooth horizontal scrolling on mobile */
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
         }
@@ -192,7 +187,7 @@
             to { box-shadow: 0 40px 150px rgba(0,0,0,1), inset 0 4px 10px rgba(255,255,255,0.25), inset 0 -6px 15px rgba(0,0,0,0.6), 0 8px 30px rgba(88,166,255,0.3); }
         }
 
-        table { width: 100%; border-collapse: separate; border-spacing: 0; min-width: 800px; /* Forces scroll on small screens instead of breaking layout */ }
+        table { width: 100%; border-collapse: separate; border-spacing: 0; min-width: 800px; }
         
         th { 
             background: rgba(3, 5, 10, 0.9); padding: 35px 30px; text-align: left; font-size: 14px; 
@@ -252,7 +247,6 @@
             transition: 0s; pointer-events: none; mix-blend-mode: overlay; z-index: 5;
         }
 
-        /* Desktop Hover Effects (Disabled on mobile below to prevent sticky touch bugs) */
         @media (hover: hover) and (pointer: fine) {
             tr:hover::before { opacity: 1; }
             tr:hover::after { left: 200%; transition: 0.8s ease-in-out; }
@@ -368,7 +362,7 @@
             background: rgba(0,0,0,0.96); backdrop-filter: blur(50px); -webkit-backdrop-filter: blur(50px);
             z-index: 1000; display: none; justify-content: center; align-items: center;
             opacity: 0; transition: opacity 0.6s ease;
-            perspective: 2000px; overflow-y: auto; /* Allow scrolling for modal overlay on small screens */
+            perspective: 2000px; overflow-y: auto;
             padding: 20px; box-sizing: border-box;
         }
         .modal-overlay.show { display: flex; opacity: 1; }
@@ -504,7 +498,6 @@
         @media (max-width: 850px) {
             body { padding: 10px; }
             
-            /* Navbar adjustments */
             .top-nav { flex-direction: column; align-items: center; gap: 20px; margin-bottom: 30px; text-align: center; }
             .brand-section { min-width: 100%; align-items: center; }
             .search-info-wrapper { flex-direction: column; width: 100%; }
@@ -513,19 +506,17 @@
             .discord-btn { width: 100%; padding: 15px; font-size: 14px; }
             .info-btn.header-pos { width: 100%; height: auto; padding: 15px; }
 
-            /* Leaderboard container gets horizontal scroll instead of crushing the table */
             .lb-container { border-radius: 20px; box-shadow: 0 20px 50px rgba(0,0,0,1); }
-            table { min-width: 800px; /* Essential to allow horizontal swipe */ }
+            table { min-width: 800px; }
             th, td { padding: 15px 20px; }
             .rank-col { font-size: 32px; padding-left: 20px; }
             .p-name { font-size: 18px; }
             .pts-val { font-size: 28px; }
             .p-head { width: 45px; height: 45px; }
 
-            /* Modal adjustments */
             .modal-content { 
                 padding: 30px 20px; width: 100%; max-height: 90vh; overflow-y: auto; 
-                transform: scale(1) translateY(0) rotateX(0) rotateY(0) !important; /* Disable 3D tilt on mobile */
+                transform: scale(1) translateY(0) rotateX(0) rotateY(0) !important;
                 border-radius: 25px;
             }
             .modal-close { top: 15px; right: 15px; width: 45px; height: 45px; font-size: 28px; transform: none; }
@@ -550,6 +541,7 @@
             .footer-strip { flex-direction: column; align-items: center; text-align: center; gap: 15px; padding: 25px; font-size: 12px; }
         }
     </style>
+    <script src="https://unpkg.com/skinview3d@3.0.0/bundles/skinview3d.bundle.js"></script>
 </head>
 <body>
 
@@ -688,17 +680,16 @@
             </div>
             <div class="modal-tiers-title">COMBAT ANALYSIS // TIERS</div>
             <div class="modal-tiers-grid" id="modalTiersGrid"></div>
+            <div id="modalSkinContainer" style="margin-top: 30px; display:flex; justify-content:center; align-items:center;"></div>
         </div>
     </div>
 
     <script>
-        // --- ABSOLUTE CINEMA: MOUSE TRACKING AURA & DYNAMIC ROW LIGHTING ---
         const cursorAura = document.getElementById('cursorAura');
         document.addEventListener('mousemove', (e) => {
             cursorAura.style.left = e.clientX + 'px';
             cursorAura.style.top = e.clientY + 'px';
             
-            // --- ABSOLUTE CINEMA: PARALLAX MODAL TILT (Only on Desktop) ---
             if (window.innerWidth > 850) {
                 if (document.getElementById('profileModal').classList.contains('show')) {
                     const modal = document.getElementById('profileModalContent');
@@ -714,7 +705,6 @@
                 }
             }
             
-            // Dynamic row spotlight effect (Only on desktop to prevent scroll bugs)
             if(window.innerWidth > 850) {
                 document.querySelectorAll('tr').forEach(row => {
                     const rect = row.getBoundingClientRect();
@@ -726,27 +716,28 @@
             }
         });
 
+        // HARDCODED UPDATED DATA
         const data = [
-            {"n": "YammanBlox", "r": "EU", "v": "HT4", "u": "LT3", "p": "LT3", "nh": "HT3", "smp": "LT3", "sw": "LT3", "a": "", "m": "", "sp": "", "c": "HT4", "soup": "LT4"},
+            {"n": "YammanBlox", "r": "EU", "v": "HT4", "u": "LT3", "p": "HT4", "nh": "LT3", "smp": "LT3", "sw": "LT3", "a": "", "m": "", "sp": "", "c": "HT4", "soup": "LT4"},
             {"n": "BL4ZE_1", "r": "EU", "v": "HT4", "u": "HT4", "p": "", "nh": "", "smp": "", "sw": "HT4", "a": "LT4", "m": "HT5", "sp": "", "c": "", "soup": ""},
             {"n": "mechycj", "r": "EU", "v": "HT3", "u": "LT3", "p": "", "nh": "", "smp": "", "sw": "", "a": "HT4", "m": "", "sp": "", "c": "", "soup": ""},
             {"n": "StarryQuest8", "r": "EU", "v": "LT4", "u": "", "p": "", "nh": "", "smp": "LT4", "sw": "LT4", "a": "HT5", "m": "HT4", "sp": "LT4", "c": "", "soup": ""},
             {"n": "IlikeSpear", "r": "EU", "v": "HT4", "u": "HT4", "p": "LT4", "nh": "", "smp": "LT3", "sw": "LT3", "a": "", "m": "HT4", "sp": "LT3", "c": "", "soup": ""},
-            {"n": "Sr_Ninhoca", "r": "EU", "v": "LT4", "u": "LT3", "p": "LT3", "nh": "LT3", "smp": "", "sw": "LT3", "a": "LT3", "m": "LT3", "sp": "", "c": "", "soup": ""},
+            {"n": "Sr_Ninhoca", "r": "EU", "v": "LT4", "u": "LT3", "p": "LT3", "nh": "LT3", "smp": "", "sw": "LT3", "a": "LT3", "m": "HT4", "sp": "", "c": "", "soup": ""},
             {"n": "vogel_dylan", "r": "EU", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "HT5", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
             {"n": "collidermc", "r": "EU", "v": "LT3", "u": "HT4", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
             {"n": "TheGloryX", "r": "EU", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "LT4", "sp": "", "c": "", "soup": ""},
             {"n": "Telekenisis2", "r": "EU", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "LT3", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
             {"n": "Darkbbu", "r": "EU", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "HT5", "sp": "", "c": "", "soup": ""},
-            {"n": "_lex", "r": "EU", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "LT3", "a": "", "m": "HT3", "sp": "", "c": "", "soup": ""},
+            {"n": "_lex", "r": "EU", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "LT3", "a": "", "m": "LT3", "sp": "", "c": "", "soup": ""},
             {"n": "HMZ3abi", "r": "EU", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "LT4", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
             {"n": "TysonFriis", "r": "EU", "v": "", "u": "", "p": "", "nh": "", "smp": "LT3", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "Job64", "r": "EU/NA", "v": "", "u": "", "p": "", "nh": "", "smp": "LT4", "sw": "", "a": "", "m": "", "sp": "", "c": "HT5", "soup": ""},
+            {"n": "Job64", "r": "EU/NA", "v": "HT5", "u": "", "p": "", "nh": "", "smp": "HT4", "sw": "", "a": "", "m": "", "sp": "", "c": "HT5", "soup": ""},
             {"n": "Sezup", "r": "AS", "v": "", "u": "LT4", "p": "", "nh": "", "smp": "", "sw": "LT5", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
             {"n": "Nesnakomoy_KING", "r": "EU", "v": "", "u": "LT3", "p": "", "nh": "", "smp": "", "sw": "HT4", "a": "HT4", "m": "", "sp": "", "c": "HT4", "soup": ""},
-            {"n": "Rxfreshed_", "r": "EU", "v": "", "u": "LT3", "p": "", "nh": "LT4", "smp": "LT3", "sw": "LT3", "a": "LT3", "m": "", "sp": "", "c": "", "soup": ""},
+            {"n": "Rxfreshed_", "r": "EU", "v": "", "u": "LT3", "p": "", "nh": "LT4", "smp": "LT3", "sw": "HT4", "a": "LT3", "m": "LT4", "sp": "", "c": "", "soup": ""},
             {"n": "apex000", "r": "EU", "v": "", "u": "", "p": "", "nh": "", "smp": "HT5", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "Swaywasaspotify", "r": "EU", "v": "LT3", "u": "", "p": "", "nh": "", "smp": "", "sw": "LT3", "a": "", "m": "HT3", "sp": "", "c": "", "soup": ""},
+            {"n": "Swaywasaspotify", "r": "EU", "v": "HT5", "u": "", "p": "", "nh": "", "smp": "", "sw": "LT3", "a": "", "m": "LT3", "sp": "", "c": "", "soup": ""},
             {"n": "overly23", "r": "EU", "v": "", "u": "", "p": "", "nh": "LT5", "smp": "", "sw": "HT4", "a": "LT4", "m": "", "sp": "", "c": "", "soup": ""},
             {"n": "SpecterDeath_", "r": "EU", "v": "LT4", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
             {"n": "majdbadran11", "r": "EU", "v": "HT4", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
@@ -759,24 +750,24 @@
             {"n": "Crrazyy", "r": "EU", "v": "HT5", "u": "", "p": "", "nh": "", "smp": "", "sw": "HT5", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
             {"n": "kukuuu12", "r": "NA", "v": "HT4", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
             {"n": "qdrxp", "r": "NA", "v": "HT5", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "SaifIsSafe", "r": "NA", "v": "HT4", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
+            {"n": "SaifIsSafe", "r": "NA", "v": "LT5", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
             {"n": "zpolz", "r": "EU", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "LT3", "sp": "", "c": "", "soup": ""},
-            {"n": "xtju", "r": "AS", "v": "HT3", "u": "", "p": "HT4", "nh": "LT3", "smp": "", "sw": "LT3", "a": "LT4", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "980million", "r": "EU", "v": "HT5", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
+            {"n": "xtju", "r": "AS", "v": "HT3", "u": "", "p": "HT4", "nh": "LT3", "smp": "", "sw": "HT5", "a": "LT4", "m": "", "sp": "", "c": "HT3", "soup": ""},
+            {"n": "980million", "r": "EU", "v": "HT5", "u": "", "p": "", "nh": "", "smp": "", "sw": "HT4", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
             {"n": "soggydogsniffa", "r": "NA", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "LT4", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
             {"n": "SPYvanguard", "r": "NA", "v": "LT4", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
             {"n": "nbuu", "r": "NA", "v": "LT3", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "TriggerDigg", "r": "EU", "v": "LT5", "u": "", "p": "", "nh": "", "smp": "", "sw": "HT5", "a": "LT4", "m": "", "sp": "", "c": "", "soup": ""},
+            {"n": "TriggerDigg", "r": "EU", "v": "LT5", "u": "LT4", "p": "", "nh": "HT5", "smp": "", "sw": "HT4", "a": "LT4", "m": "", "sp": "", "c": "", "soup": ""},
             {"n": "zkyuta", "r": "NA", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "LT3", "a": "HT4", "m": "", "sp": "", "c": "", "soup": ""},
             {"n": "zarzyy_", "r": "EU", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "HT4", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
             {"n": "SirRazul", "r": "AS", "v": "HT5", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
             {"n": "k6vz", "r": "EU", "v": "HT4", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
             {"n": "Arsahka", "r": "EU", "v": "", "u": "LT3", "p": "HT5", "nh": "", "smp": "HT5", "sw": "HT4", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
             {"n": "Sp0ng3_", "r": "NA", "v": "", "u": "", "p": "", "nh": "LT4", "smp": "", "sw": "LT3", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "_0pl", "r": "EU", "v": "LT4", "u": "", "p": "", "nh": "", "smp": "", "sw": "HT4", "a": "", "m": "LT4", "sp": "", "c": "HT4", "soup": ""},
+            {"n": "_0pl", "r": "EU", "v": "HT5", "u": "", "p": "", "nh": "", "smp": "", "sw": "HT4", "a": "", "m": "LT4", "sp": "", "c": "HT4", "soup": ""},
             {"n": "Mappengloving67", "r": "EU", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "HT4", "a": "", "m": "HT5", "sp": "", "c": "", "soup": ""},
             {"n": "1stkira", "r": "EU", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "LT5", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "_Cr7x2y_", "r": "EU", "v": "HT5", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "HT4", "soup": ""},
+            {"n": "_Cr7x2y_", "r": "EU", "v": "HT4", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "HT4", "soup": ""},
             {"n": "intrtw1ned", "r": "NA", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "LT3", "sp": "", "c": "", "soup": ""},
             {"n": "AlucardMc", "r": "EU", "v": "HT5", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "HT4", "sp": "", "c": "", "soup": ""},
             {"n": "mapeldrip", "r": "EU", "v": "LT4", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "HT5", "sp": "", "c": "", "soup": ""},
@@ -788,7 +779,7 @@
             {"n": "Marcel1308", "r": "EU", "v": "LT5", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
             {"n": "giove123", "r": "EU", "v": "LT5", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
             {"n": "Jackieechannn", "r": "NA", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "LT4", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "juniorcaos", "r": "EU", "v": "LT4", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
+            {"n": "juniorcaos", "r": "EU", "v": "LT5", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
             {"n": "SillyFlowers", "r": "EU", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "HT5", "sp": "", "c": "", "soup": ""},
             {"n": "JimmyOtakuuu", "r": "EU", "v": "", "u": "LT4", "p": "", "nh": "", "smp": "LT4", "sw": "", "a": "", "m": "HT5", "sp": "", "c": "", "soup": ""},
             {"n": "Bakli", "r": "EU", "v": "LT3", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
@@ -796,15 +787,15 @@
             {"n": "Nehaan12", "r": "EU", "v": "LT5", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
             {"n": "nikosCPvP", "r": "EU", "v": "HT5", "u": "", "p": "", "nh": "", "smp": "", "sw": "LT5", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
             {"n": "SmogBorn", "r": "EU", "v": "LT4", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "DEDGUY_", "r": "AS", "v": "HT5", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": "HT5"},
+            {"n": "DEDGUY_", "r": "AS", "v": "LT4", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": "HT5"},
             {"n": "fraudity", "r": "EU", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "LT4", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
             {"n": "_SpeedPvP_", "r": "AS", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "LT5", "sp": "", "c": "", "soup": ""},
             {"n": "oxivity", "r": "EU", "v": "HT5", "u": "", "p": "", "nh": "", "smp": "", "sw": "HT4", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
             {"n": "Goat_Loki", "r": "EU", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "LT4", "a": "", "m": "HT5", "sp": "", "c": "", "soup": ""},
             {"n": "AB_Pider", "r": "AS", "v": "LT3", "u": "", "p": "", "nh": "LT3", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "MrFardin", "r": "AS", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "HT5", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
+            {"n": "MrFardin", "r": "AS", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "HT4", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
             {"n": "UnWarmed", "r": "AS", "v": "LT4", "u": "", "p": "", "nh": "", "smp": "", "sw": "LT3", "a": "", "m": "", "sp": "", "c": "", "soup": "HT5"},
-            {"n": "Tudor07", "r": "EU", "v": "LT3", "u": "", "p": "", "nh": "", "smp": "", "sw": "HT4", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
+            {"n": "Tudor07", "r": "EU", "v": "HT4", "u": "", "p": "", "nh": "", "smp": "", "sw": "HT4", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
             {"n": "MrDqcks", "r": "EU", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "LT3", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
             {"n": "DxrkHxnter", "r": "EU", "v": "LT4", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
             {"n": "duddleton12", "r": "EU", "v": "HT5", "u": "", "p": "", "nh": "", "smp": "", "sw": "LT5", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
@@ -835,7 +826,7 @@
             {"n": "X1N0_D", "r": "NA", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "LT3", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
             {"n": "4vor", "r": "AS", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "HT4", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
             {"n": "_Thatoneguy0", "r": "NA", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "HT5", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "maciekzhool ASIA", "r": "AS", "v": "LT4", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "HT5", "soup": "HT4"},
+            {"n": "maciekzhool ASIA", "r": "AS", "v": "HT5", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "HT5", "soup": "HT4"},
             {"n": "mandshuk", "r": "AS", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "HT4", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
             {"n": "Zain_Qaiser", "r": "NA", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "HT4", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
             {"n": "Dragonm41612", "r": "AS", "v": "HT5", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
@@ -853,20 +844,20 @@
             {"n": "shizzlejhizzle", "r": "NA", "v": "HT5", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
             {"n": "wviscool", "r": "EU", "v": "LT4", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "LT4", "soup": ""},
             {"n": "MilkIsGod", "r": "EU", "v": "HT4", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "__lex_", "r": "EU", "v": "", "u": "HT5", "p": "", "nh": "", "smp": "", "sw": "LT5", "a": "", "m": "HT4", "sp": "HT4", "c": "", "soup": ""},
+            {"n": "__lex_", "r": "EU", "v": "", "u": "HT5", "p": "", "nh": "", "smp": "", "sw": "LT3", "a": "", "m": "HT4", "sp": "HT4", "c": "", "soup": ""},
             {"n": "General1133", "r": "EU", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "HT5", "a": "", "m": "LT4", "sp": "", "c": "LT4", "soup": ""},
             {"n": "FrogArmyNumber1", "r": "EU", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "LT4", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
             {"n": "wtwgio", "r": "NA", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "HT4", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
             {"n": "PhoenixN1", "r": "AS", "v": "", "u": "", "p": "", "nh": "HT5", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
             {"n": "zuckerl", "r": "EU", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "LT3", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "Xx_Auqa", "r": "EU", "v": "HT4", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "LT4", "soup": ""},
+            {"n": "Xx_Auqa", "r": "EU", "v": "LT4", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "LT4", "soup": ""},
             {"n": "gep_", "r": "EU", "v": "", "u": "", "p": "", "nh": "LT4", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
             {"n": "xRaaif", "r": "AS", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "HT4", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
             {"n": "sichl", "r": "EU", "v": "", "u": "", "p": "", "nh": "LT3", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
-            {"n": "0fenKartoffeln", "r": "EU", "v": "HT5", "u": "", "p": "", "nh": "", "smp": "", "sw": "HT5", "a": "", "m": "", "sp": "", "c": "LT4", "soup": ""},
+            {"n": "0fenKartoffeln", "r": "EU", "v": "HT5", "u": "", "p": "", "nh": "", "smp": "", "sw": "HT5", "a": "", "m": "", "sp": "", "c": "LT4", "soup": "HT5"},
             {"n": "K4rtoffelsalat", "r": "EU", "v": "LT4", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "LT4", "soup": ""},
             {"n": "Elionemelone", "r": "EU", "v": "LT4", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "LT4", "soup": ""},
-            {"n": "FloonsMC", "r": "EU", "v": "LT3", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "LT3", "soup": ""},
+            {"n": "FloonsMC", "r": "EU", "v": "LT4", "u": "", "p": "", "nh": "", "smp": "", "sw": "", "a": "", "m": "", "sp": "", "c": "LT3", "soup": ""},
             {"n": "youngAR0", "r": "NA", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "LT4", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
             {"n": "Sp0ng3_", "r": "NA", "v": "", "u": "", "p": "", "nh": "LT4", "smp": "", "sw": "LT3", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
             {"n": "Goatedonyx", "r": "NA", "v": "", "u": "", "p": "", "nh": "", "smp": "", "sw": "LT3", "a": "", "m": "", "sp": "", "c": "", "soup": ""},
@@ -1004,7 +995,7 @@
             const tbody = document.getElementById('lbTable');
             const rows = tbody.getElementsByTagName('tr');
             for (let i = 0; i < rows.length; i++) {
-                if (rows[i].dataset.hasHover) continue;
+                if (rows[i].dataset.hasHover) continue; // Prevent duplicate event listeners
                 rows[i].dataset.hasHover = "true";
 
                 let color = '#58a6ff';
@@ -1020,9 +1011,10 @@
         function createRowParticles(row, color) {
             if(window.innerWidth < 1000) return;
             clearInterval(row.particleInterval); 
+            // Greatly reduced particle spawn rate for a cleaner look
             row.particleInterval = setInterval(() => {
-                for (let i = 0; i < 2; i++) { 
-                    const particle = document.createElement('div'); 
+                for (let i = 0; i < 2; i++) { // Max 2 particles per interval
+                    const particle = document.createElement('div'); // Square divs
                     particle.className = 'row-particle';
                     particle.style.background = color;
                     particle.style.boxShadow = `0 0 15px ${color}, 0 0 30px ${color}`;
@@ -1036,9 +1028,10 @@
                     document.body.appendChild(particle);
                     setTimeout(() => { particle.remove(); }, 800); 
                 }
-            }, 120);
+            }, 120); // Slower interval
         }
 
+        let skinViewer = null; // Store 3D viewer globally
         const modalOverlay = document.getElementById('profileModal');
         const modalPHeadWrap = document.getElementById('modalPHeadWrap');
         const modalPHead = document.getElementById('modalPHead');
@@ -1052,6 +1045,13 @@
         function openProfile(playerName) {
             const p = data.find(player => player.n === playerName);
             if (!p) return;
+
+            // Dispose old 3D model properly
+            if (skinViewer) {
+                skinViewer.dispose();
+                skinViewer = null;
+            }
+
             const achievement = getAchievement(p.pts);
             modalPHead.src = `https://mineskin.eu/helm/${p.n}/128`;
             modalPHead.onerror = () => { modalPHead.src = 'https://mineskin.eu/helm/steve/128'; };
@@ -1060,7 +1060,7 @@
             modalPTitle.innerHTML = `<span class="${achievement.class}">${achievement.icon} ${achievement.name}</span>`;
             modalPPosVal.innerText = `#${p.globalRank}`;
             
-            // --- ABSOLUTE CINEMA: ANIMATED COUNTER FOR POINTS ---
+            // ANIMATED COUNTER FOR POINTS
             const targetPts = p.pts;
             modalPPtsVal.innerText = "0";
             const animationDuration = 1200; 
@@ -1087,6 +1087,7 @@
             if (p.globalRank === 3) modalPHeadWrap.classList.add('r3');
             modalPPosVal.className = 'modal-pts-val';
             if (p.globalRank <= 3) modalPPosVal.classList.add(`r${p.globalRank}`);
+            
             let tiersHtml = '';
             Object.keys(icons).forEach(k => {
                 const tierClass = p[k] ? `tier-${p[k]}` : '';
@@ -1098,11 +1099,30 @@
                     </div>`;
             });
             modalTiersGrid.innerHTML = tiersHtml;
+            
             modalOverlay.classList.add('show');
             document.body.style.overflow = 'hidden';
             
             if(window.innerWidth > 850) {
                 document.getElementById('profileModalContent').style.transform = `scale(1) translateY(0) rotateX(0deg) rotateY(0deg)`;
+            }
+
+            // Initialize 3D Viewer inside modalSkinContainer with a tiny delay
+            const modalSkinContainer = document.getElementById('modalSkinContainer');
+            if (modalSkinContainer) {
+                modalSkinContainer.innerHTML = '';
+                setTimeout(() => {
+                    skinViewer = new skinview3d.SkinViewer({
+                        canvas: document.createElement("canvas"),
+                        width: 280,
+                        height: 380,
+                        skin: `https://mineskin.eu/skin/${p.n}`
+                    });
+                    modalSkinContainer.appendChild(skinViewer.canvas);
+                    skinViewer.autoRotate = true;
+                    skinViewer.autoRotateSpeed = 0.6;
+                    skinViewer.controls.enableZoom = false;
+                }, 50);
             }
         }
 
@@ -1121,7 +1141,6 @@
             }
         });
 
-        // ABSOLUTE CINEMA: MINECRAFT CLICK SPARKS
         document.addEventListener('click', function(e) {
             for(let i = 0; i < 8; i++) {
                 let spark = document.createElement('div');
