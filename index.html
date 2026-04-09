@@ -358,7 +358,6 @@
         }
         .footer-strip b { color: var(--accent); text-shadow: 0 0 25px rgba(88,166,255,0.8); font-size: 18px;}
 
-        /* --- ABSOLUTE CINEMA: HYPER PARALLAX MODALS --- */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.96); backdrop-filter: blur(50px); -webkit-backdrop-filter: blur(50px);
@@ -486,7 +485,6 @@
         .modal-t-badge.active { color: white; background: linear-gradient(135deg, rgba(255,255,255,0.2), rgba(0,0,0,0.98)); border-color: rgba(255,255,255,0.4); }
         .modal-t-badge.inactive { opacity: 0.15; filter: grayscale(1) contrast(0.5); border-color: rgba(255,255,255,0.03) !important; box-shadow: none !important; }
 
-        /* --- THE ULTIMATE MOBILE RESPONSIVE MATRIX --- */
         @media (max-width: 850px) {
             body { padding: 10px; }
             
@@ -721,9 +719,6 @@
             isMouseMoving = false;
         }
 
-        // =========================================================
-        // LIVE DATABASE SYNC WITH ANTI-CACHE
-        // =========================================================
         let data = [];
 
         const icons = {
@@ -806,11 +801,11 @@
         const itemsPerPage = 10;
         let currentFilteredData = [];
         let isFetchingPage = false; 
-        let hasMoreData = true; // SCROLL BUG FIX: Master lock for end of list
+        let hasMoreData = true;
 
         function filterLb(isReset = true) {
             if (isFetchingPage) return; 
-            if (!isReset && !hasMoreData) return; // SCROLL BUG FIX: Stop fetching if no more data exists
+            if (!isReset && !hasMoreData) return;
 
             const query = document.getElementById('searchInput').value.toLowerCase();
             const body = document.getElementById('lbTable');
@@ -829,7 +824,6 @@
             const end = start + itemsPerPage;
             const chunk = currentFilteredData.slice(start, end);
 
-            // SCROLL BUG FIX: If we hit the end of the list, permanently lock the scroll
             if (chunk.length === 0) {
                 hasMoreData = false;
                 isFetchingPage = false;
@@ -885,7 +879,7 @@
             if (!isReset) {
                 setTimeout(() => {
                     isFetchingPage = false;
-                }, 300); // Wait 300ms before allowing another fetch to prevent spam
+                }, 300);
             }
         }
 
@@ -997,9 +991,6 @@
                 document.getElementById('profileModalContent').style.transform = `scale(1) translateY(0) rotateX(0deg) rotateY(0deg)`;
             }
 
-            // 3D VIEWER MEMORY LEAK FIX
-            // Instead of deleting and re-creating the heavy WebGL canvas 
-            // we create it ONCE and just swap the skin texture!
             if (!skinViewer) {
                 skinViewer = new skinview3d.SkinViewer({
                     canvas: document.createElement("canvas"),
@@ -1025,7 +1016,6 @@
             if (e.target === modalOverlay) closeProfile();
         }
 
-        // SCROLL BUG FIX: Throttled Scroll Listener to completely prevent infinite fetching loops
         let scrollTimeout = null;
         window.addEventListener('scroll', () => {
             if (scrollTimeout) return;
@@ -1062,7 +1052,6 @@
 
         function initFloatingDust() {
             const container = document.getElementById('mcDustContainer');
-            // MOBILE OPTIMIZATION: Only spawn 25 particles on phones to save VRAM
             const dustCount = window.innerWidth > 850 ? 60 : 25; 
             for(let i = 0; i < dustCount; i++) {
                 let dust = document.createElement('div');
@@ -1076,7 +1065,6 @@
         
         initFloatingDust();
         
-        // Load the live data on startup!
         loadLeaderboardData();
     </script>
 </body>
