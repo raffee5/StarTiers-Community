@@ -94,7 +94,7 @@
             box-shadow: 0 0 20px var(--accent), 0 0 40px var(--accent); opacity: 0;
             animation: floatUp 7s linear infinite; border-radius: 1px;
             border: 1px solid rgba(255,255,255,0.3);
-            will-change: transform, opacity; /* OPTIMIZATION */
+            will-change: transform, opacity;
         }
         @keyframes floatUp {
             0% { transform: translate3d(0, 100vh, 0) rotate(0deg) scale(0.5); opacity: 0; filter: brightness(1); }
@@ -742,7 +742,6 @@
     </div>
 
     <script>
-        // DOM Element Caching to eliminate high-frequency lookup lag
         const cursorAura = document.getElementById('cursorAura');
         const profileModal = document.getElementById('profileModal');
         const profileModalContent = document.getElementById('profileModalContent');
@@ -765,8 +764,6 @@
             }
         });
 
-        // Event Delegation to perfectly update glowing mouse coordinates *only* on the row being hovered
-        // Completely removes the 60fps loop over hundreds of rows
         mainTable.addEventListener('mousemove', (e) => {
             if (window.innerWidth <= 850) return;
             const row = e.target.closest('tr');
@@ -1066,8 +1063,6 @@
             }
         }
 
-        // Delegated Event Listener for creating Row Hover Particles 
-        // Eliminates mass-generation of memory-heavy event listeners over paginated DOM nodes
         mainTable.addEventListener('mouseover', (e) => {
             const row = e.target.closest('tr');
             if(row && !row.particleInterval) {
@@ -1092,7 +1087,7 @@
             clearInterval(row.particleInterval); 
             row.particleInterval = setInterval(() => {
                 const fragment = document.createDocumentFragment();
-                const rect = row.getBoundingClientRect(); // Cached per tick to avoid thrashing multiple nodes
+                const rect = row.getBoundingClientRect(); 
                 for (let i = 0; i < 2; i++) {
                     const particle = document.createElement('div');
                     particle.style.position = 'fixed';
@@ -1221,7 +1216,6 @@
             }, 100); 
         });
 
-        // Batched DOM Insertion for the click sparks effect
         document.addEventListener('click', function(e) {
             const frag = document.createDocumentFragment();
             const sparks = [];
