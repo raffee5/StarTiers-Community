@@ -137,6 +137,7 @@
         .gamemode-nav {
             max-width: 1400px; margin: 0 auto 30px; display: flex; gap: 15px; overflow-x: auto;
             padding: 10px 5px; -webkit-overflow-scrolling: touch; position: relative; z-index: 10;
+            perspective: 1200px; transform-style: preserve-3d;
         }
         .gamemode-nav::-webkit-scrollbar { height: 6px; }
         .gamemode-nav::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); border-radius: 10px; }
@@ -148,22 +149,36 @@
             cursor: pointer; display: flex; align-items: center; gap: 10px; white-space: nowrap;
             transition: var(--transition-bounce); text-transform: uppercase; letter-spacing: 2px;
             box-shadow: 0 8px 20px rgba(0,0,0,0.5), inset 0 1px 2px rgba(255,255,255,0.1); backdrop-filter: blur(15px);
+            transform-style: preserve-3d;
         }
         .gm-btn img { width: 22px; height: 22px; image-rendering: pixelated; filter: drop-shadow(0 3px 5px rgba(0,0,0,0.8)); transition: 0.4s; }
-        .gm-btn:hover { background: rgba(255,255,255,0.08); color: #fff; transform: translateY(-4px) scale(1.03); border-color: rgba(255,255,255,0.2); box-shadow: 0 12px 25px rgba(0,0,0,0.6); }
-        .gm-btn.active { background: linear-gradient(135deg, rgba(0,210,255,0.25), rgba(0,0,0,0.8)); border-color: var(--accent); color: #fff; box-shadow: 0 10px 30px rgba(0,210,255,0.4), inset 0 2px 10px rgba(255,255,255,0.2); transform: translateY(-4px) scale(1.03); padding: 12px 30px;}
+        .gm-btn:hover { background: rgba(255,255,255,0.08); color: #fff; transform: translateY(-5px) translateZ(25px) rotateX(10deg) scale(1.05); border-color: rgba(255,255,255,0.2); box-shadow: 0 15px 35px rgba(0,0,0,0.7), 0 0 20px var(--accent); }
+        .gm-btn.active { background: linear-gradient(135deg, rgba(0,210,255,0.25), rgba(0,0,0,0.8)); border-color: var(--accent); color: #fff; box-shadow: 0 10px 30px rgba(0,210,255,0.4), inset 0 2px 10px rgba(255,255,255,0.2); transform: translateY(-4px) translateZ(20px) scale(1.05); padding: 12px 30px;}
         .gm-btn.active img { transform: scale(1.2) rotate(10deg); filter: drop-shadow(0 0 10px var(--accent)); }
 
         .lb-container { 
             max-width: 1400px; margin: 0 auto; background: var(--panel); 
             border: 1px solid rgba(255,255,255,0.08); border-top: 1px solid rgba(255,255,255,0.25); border-left: 1px solid rgba(255,255,255,0.15);
-            border-radius: 30px; overflow: hidden; 
+            border-radius: 30px; 
             backdrop-filter: blur(35px) saturate(160%); -webkit-backdrop-filter: blur(35px) saturate(160%);
             position: relative; z-index: 10;
             box-shadow: 0 40px 100px rgba(0,0,0,0.8), var(--glass-shine), 0 10px 40px rgba(0,210,255,0.05);
             animation: containerBreathe 8s infinite alternate ease-in-out;
-            overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 10px;
+            padding: 10px;
+            overflow: visible;
         }
+        
+        .table-wrap {
+            width: 100%;
+            border-radius: 20px;
+        }
+        @media (max-width: 1000px) {
+            .table-wrap {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+        }
+
         @keyframes containerBreathe {
             from { box-shadow: 0 40px 100px rgba(0,0,0,0.8), var(--glass-shine), 0 10px 40px rgba(0,210,255,0.05); }
             to { box-shadow: 0 40px 100px rgba(0,0,0,0.8), var(--glass-shine), 0 10px 60px rgba(0,210,255,0.15); }
@@ -243,7 +258,7 @@
             tr:hover .dim-t { opacity: 0.6; filter: grayscale(0.4); transform: scale(1.05); }
         }
         
-        .rank-col { width: 110px; text-align: center; font-weight: 900; font-size: 44px; font-family: 'VT323', monospace; padding-left: 20px; transition: var(--transition-bounce); color: #4b5260; position: relative; transform-style: preserve-3d;}
+        .rank-col { width: 130px; min-width: 120px; white-space: nowrap; text-align: center; font-weight: 900; font-size: 44px; font-family: 'VT323', monospace; padding-left: 20px; transition: var(--transition-bounce); color: #4b5260; position: relative; transform-style: preserve-3d;}
         .r1 { color: #fff; text-shadow: 0 1px 0 #c29900, 0 2px 0 #a38000, 0 3px 0 #856800, 0 4px 0 #665000, 0 5px 0 #473800, 0 10px 15px rgba(0,0,0,0.8), 0 0 25px var(--gold); }
         .r2 { color: #fff; text-shadow: 0 1px 0 #b3b3b3, 0 2px 0 #999999, 0 3px 0 #808080, 0 4px 0 #666666, 0 5px 0 #4d4d4d, 0 10px 15px rgba(0,0,0,0.8), 0 0 25px var(--silver); }
         .r3 { color: #fff; text-shadow: 0 1px 0 #a66629, 0 2px 0 #8c5622, 0 3px 0 #73461c, 0 4px 0 #593615, 0 5px 0 #40260f, 0 10px 15px rgba(0,0,0,0.8), 0 0 25px var(--bronze); }
@@ -280,7 +295,7 @@
         .title-rookie { color: #6b7280; }
 
         .pts-container { display: flex; flex-direction: column; align-items: flex-start; line-height: 1; }
-        .pts-val { font-weight: 900; font-size: 34px; color: var(--accent); font-family: 'VT323', monospace; letter-spacing: 2px; text-shadow: 0 0 15px rgba(0,210,255,0.5); transition: var(--transition-bounce); }
+        .pts-val { font-weight: 900; font-size: 34px; color: var(--accent); font-family: 'VT323', monospace; letter-spacing: 2px; text-shadow: 0 0 15px rgba(0,210,255,0.5); transition: var(--transition-bounce); white-space: nowrap;}
         .pts-lbl { font-size: 10px; color: #8a93a5; text-transform: uppercase; font-weight: 800; letter-spacing: 2px; margin-top: 4px; transition: var(--transition-smooth);}
 
         .tier-list { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -308,16 +323,23 @@
         .dim-t { opacity: 0.3; filter: grayscale(1); border-color: transparent !important; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5) !important; background: rgba(0,0,0,0.3); }
 
         .tier-columns-container {
-            display: flex; gap: 20px; padding: 20px 0; overflow-x: auto; min-height: 550px;
+            display: flex; gap: 20px; padding: 20px 0; overflow-x: auto; min-height: 550px; align-items: flex-start;
         }
         .tier-column {
             flex: 1; min-width: 260px; background: linear-gradient(180deg, rgba(15,20,30,0.4), rgba(5,7,12,0.6)); border-radius: 24px;
             border: 1px solid rgba(255,255,255,0.08); border-top: 1px solid rgba(255,255,255,0.2); display: flex; flex-direction: column;
             overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.5), var(--glass-shine);
             transition: var(--transition-bounce); backdrop-filter: blur(20px);
+            height: fit-content;
         }
         .tier-column:hover { transform: translateY(-8px); box-shadow: 0 30px 60px rgba(0,0,0,0.7), var(--glass-shine), 0 0 20px rgba(0,210,255,0.1); border-color: rgba(255,255,255,0.2); }
         
+        .tier-column.t1 { border-top: 2px solid var(--gold); box-shadow: 0 20px 40px rgba(0,0,0,0.5), inset 0 2px 15px rgba(255,204,0,0.05); }
+        .tier-column.t2 { border-top: 2px solid var(--silver); box-shadow: 0 20px 40px rgba(0,0,0,0.5), inset 0 2px 15px rgba(224,224,224,0.05); }
+        .tier-column.t3 { border-top: 2px solid var(--bronze); box-shadow: 0 20px 40px rgba(0,0,0,0.5), inset 0 2px 15px rgba(205,127,50,0.05); }
+        .tier-column.t4 { border-top: 2px solid #a020f0; box-shadow: 0 20px 40px rgba(0,0,0,0.5), inset 0 2px 15px rgba(160,32,240,0.05); }
+        .tier-column.t5 { border-top: 2px solid #78909c; box-shadow: 0 20px 40px rgba(0,0,0,0.5), inset 0 2px 15px rgba(120,144,156,0.05); }
+
         .tier-col-header {
             padding: 20px; text-align: center; font-weight: 900; font-size: 20px; color: #fff;
             text-transform: uppercase; letter-spacing: 4px; border-bottom: 2px solid rgba(255,255,255,0.1);
@@ -358,11 +380,9 @@
         .tier-player-card img { width: 36px; height: 36px; border-radius: 8px; image-rendering: pixelated; box-shadow: 0 4px 10px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1); transition: 0.4s; position: relative; z-index: 2;}
         .tier-player-card:hover img { transform: scale(1.1) rotate(-5deg); box-shadow: 0 8px 15px rgba(0,0,0,0.9), 0 0 10px var(--accent); border-color: #fff; }
         
-        .tier-player-info { display: flex; flex-direction: column; gap: 2px; position: relative; z-index: 2;}
+        .tier-player-info { display: flex; flex-direction: column; gap: 4px; position: relative; z-index: 2;}
         .tier-player-name { font-weight: 800; font-size: 15px; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.8); letter-spacing: 1px; transition: 0.4s;}
         .tier-player-card:hover .tier-player-name { color: #fff; text-shadow: 0 0 8px rgba(255,255,255,0.6);}
-        .tier-player-sub { font-size: 10px; font-weight: 900; letter-spacing: 1px; color: #8a93a5; text-transform: uppercase;}
-        .tier-player-sub.ht { color: var(--gold); }
 
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -413,7 +433,7 @@
         .pts-item { background: rgba(0,0,0,0.6); padding: 16px 20px; border-radius: 18px; border: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center; transition: var(--transition-bounce); box-shadow: inset 0 2px 15px rgba(0,0,0,0.6); }
         .pts-item:hover { transform: scale(1.06) translateY(-4px); background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.3); box-shadow: 0 15px 40px rgba(0,0,0,0.8), var(--glass-shine); }
         .pts-tag { font-weight: 900; font-size: 14px; padding: 6px 12px; border-radius: 8px; letter-spacing: 2px;}
-        .pts-val-num { color: var(--accent); font-weight: 900; font-size: 26px; text-shadow: 0 0 20px rgba(0,210,255,0.8); font-family: 'VT323', monospace; }
+        .pts-val-num { color: var(--accent); font-weight: 900; font-size: 26px; text-shadow: 0 0 20px rgba(0,210,255,0.8); font-family: 'VT323', monospace; white-space: nowrap; }
 
         .modal-p-head-wrap { position: relative; display: flex; justify-content: center; align-items: center; margin-bottom: 35px; transform: translateZ(60px); }
         .modal-p-head-wrap::after {
@@ -447,10 +467,10 @@
         }
 
         .modal-pos-panel, .modal-pts-overall-panel { display: flex; flex-direction: column; align-items: center; position: relative; z-index: 2;}
-        .modal-pts-val { font-size: 50px; font-weight: 900; color: white; font-family: 'VT323', monospace; text-shadow: 0 0 30px rgba(255,255,255,0.5);}
+        .modal-pts-val { font-size: 50px; font-weight: 900; color: white; font-family: 'VT323', monospace; text-shadow: 0 0 30px rgba(255,255,255,0.5); white-space: nowrap;}
         .modal-pos-lbl { font-size: 14px; color: #8a93a5; font-weight: 900; text-transform: uppercase; letter-spacing: 4px; margin-top: 6px;}
 
-        .modal-pts-overall-panel span { font-size: 50px; font-weight: 900; color: var(--accent); font-family: 'VT323', monospace; text-shadow: 0 0 35px rgba(0,210,255,0.7);}
+        .modal-pts-overall-panel span { font-size: 50px; font-weight: 900; color: var(--accent); font-family: 'VT323', monospace; text-shadow: 0 0 35px rgba(0,210,255,0.7); white-space: nowrap;}
         .modal-pts-overall-panel b { color: #8a93a5; font-weight: 900; font-size: 14px; font-family: 'Inter', sans-serif; letter-spacing: 4px; margin-top: 6px;}
 
         .modal-tiers-title { font-size: 15px; color: #8a93a5; font-weight: 900; text-transform: uppercase; letter-spacing: 5px; margin-bottom: 20px; width: 100%; text-align: left; padding-bottom: 10px; border-bottom: 2px solid rgba(255,255,255,0.1); transform: translateZ(30px);}
@@ -548,18 +568,20 @@
     <div class="gamemode-nav" id="gamemodeNav"></div>
 
     <div class="lb-container">
-        <table id="mainTable">
-            <thead>
-                <tr>
-                    <th class="rank-col" style="padding-left:0;">Pos</th>
-                    <th>Player</th>
-                    <th>Score</th>
-                    <th>Region</th>
-                    <th>All Gamemodes</th>
-                </tr>
-            </thead>
-            <tbody id="lbTable"></tbody>
-        </table>
+        <div class="table-wrap">
+            <table id="mainTable">
+                <thead>
+                    <tr>
+                        <th class="rank-col" style="padding-left:0;">Pos</th>
+                        <th>Player</th>
+                        <th>Score</th>
+                        <th>Region</th>
+                        <th>All Gamemodes</th>
+                    </tr>
+                </thead>
+                <tbody id="lbTable"></tbody>
+            </table>
+        </div>
         <div id="tierColumnsLayout" class="tier-columns-container" style="display: none;"></div>
     </div>
 
@@ -589,7 +611,7 @@
                     <div class="info-rank-desc">Obtained 250+ total points.</div>
                 </div>
                 <div class="info-row">
-                    <div class="info-rank-icon" style="color:var(--danger)">❖</div>
+                    <div class="info-rank-icon" style="color:#ff2a55">❖</div>
                     <div class="info-rank-name title-ace">Combat Ace</div>
                     <div class="info-rank-desc">Obtained 100+ total points.</div>
                 </div>
@@ -703,6 +725,7 @@
         const infoModalContent = document.getElementById('infoModalContent');
         const lbTable = document.getElementById('lbTable');
         const mainTable = document.getElementById('mainTable');
+        const tableWrap = document.querySelector('.table-wrap');
         
         let isMouseMoving = false;
         let targetRow = null;
@@ -838,15 +861,14 @@
             document.querySelectorAll('.gm-btn').forEach(btn => btn.classList.remove('active'));
             document.getElementById(`btn-gm-${gm}`).classList.add('active');
 
-            const mainTable = document.getElementById('mainTable');
             const tierCols = document.getElementById('tierColumnsLayout');
 
             if (gm === 'all') {
-                mainTable.style.display = 'table';
+                tableWrap.style.display = 'block';
                 tierCols.style.display = 'none';
                 filterLb(true);
             } else {
-                mainTable.style.display = 'none';
+                tableWrap.style.display = 'none';
                 tierCols.style.display = 'flex';
                 renderTierColumns(gm);
             }
@@ -887,13 +909,13 @@
             [1, 2, 3, 4, 5].forEach(tNum => {
                 let pCards = tiers[tNum].map(item => {
                     const p = item.player;
-                    const subClass = item.isHT ? 'ht' : '';
+                    const tierClass = `tier-${item.exactTier}`;
                     return `
                         <div class="tier-player-card" onclick="openProfile('${p.n}')">
                             <img src="https://mineskin.eu/helm/${p.n}/64" onerror="this.src='https://mineskin.eu/helm/steve/64'">
                             <div class="tier-player-info">
                                 <span class="tier-player-name">${p.n}</span>
-                                <span class="tier-player-sub ${subClass}">${item.exactTier}</span>
+                                <span class="tier-player-sub ${tierClass}" style="padding: 3px 8px; border-radius: 6px; font-size: 11px; width: fit-content; margin-top: 2px;">${item.exactTier}</span>
                             </div>
                         </div>
                     `;
@@ -904,7 +926,7 @@
                 }
 
                 html += `
-                    <div class="tier-column">
+                    <div class="tier-column t${tNum}">
                         <div class="tier-col-header t${tNum}">Tier ${tNum}</div>
                         <div class="tier-players">
                             ${pCards}
